@@ -1,75 +1,75 @@
 CREATE DATABASE dbDiyProjectPlatform;
 GO
 
-USE dbRWAProj;
+USE dbDiyProjectPlatform;
 GO
 
 CREATE TABLE [UserRole] (
-	Id int PRIMARY KEY,
-	Name nvarchar(50) NOT NULL
+	[Id] int PRIMARY KEY,
+	[Name] nvarchar(50) NOT NULL
 );
 GO
 
 CREATE TABLE [User] (
-	Id int IDENTITY(1,1) PRIMARY KEY,
-	Username nvarchar(255) NOT NULL,
-	Email nvarchar(255) NOT NULL,
-	Password nvarchar(255) NOT NULL,
-	ProfilePicture nvarchar(max) NULL,
-	UserRoleId int DEFAULT 10 NOT NULL
-	FOREIGN KEY REFERENCES [UserRole](Id)
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[Username] nvarchar(255) NOT NULL,
+	[Email] nvarchar(255) NOT NULL,
+	[Password] nvarchar(255) NOT NULL,
+	[ProfilePicture] nvarchar(max) NULL,
+	[UserRoleId] int DEFAULT 10 NOT NULL
+	FOREIGN KEY REFERENCES [UserRole]([Id])
 );
 GO
 
 CREATE TABLE [Topic] (
-	Id int IDENTITY(1,1) PRIMARY KEY,
-	Name nvarchar(255) NOT NULL
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[Name] nvarchar(255) NOT NULL
 );
 GO
 
 CREATE TABLE [Project] (
-	Id int IDENTITY(1,1) PRIMARY KEY,
-	Title nvarchar(255) NOT NULL,
-	DateCreated datetime DEFAULT GETDATE(),
-	Description nvarchar(200) NOT NULL,
-	Content nvarchar(max) NOT NULL,
-	TopicId int NOT NULL
-	FOREIGN KEY REFERENCES [Topic](Id),
-	UserId int NOT NULL
-	FOREIGN KEY REFERENCES [User](Id),
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[Title] nvarchar(255) NOT NULL,
+	[DateCreated] datetime DEFAULT GETDATE(),
+	[Description] nvarchar(200) NOT NULL,
+	[Content] nvarchar(max) NOT NULL,
+	[TopicId] int NOT NULL
+	FOREIGN KEY REFERENCES [Topic]([Id]),
+	[UserId] int NOT NULL
+	FOREIGN KEY REFERENCES [User]([Id]),
 );
 GO
 
 CREATE TABLE [Material] (
-	Id int IDENTITY(1,1) PRIMARY KEY,
-	Name nvarchar(255) NOT NULL
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[Name] nvarchar(255) NOT NULL
 );
 GO
 
 CREATE TABLE [ProjectMaterial] (
-	Id int IDENTITY(1,1) PRIMARY KEY,
-	ProjectId int NOT NULL
-	FOREIGN KEY REFERENCES [Project](Id),
-	MaterialId int NOT NULL
-	FOREIGN KEY REFERENCES [Material](Id)
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[ProjectId] int NOT NULL
+	FOREIGN KEY REFERENCES [Project]([Id]),
+	[MaterialId] int NOT NULL
+	FOREIGN KEY REFERENCES [Material]([Id])
 );
 GO
 
 CREATE TABLE [ProjectStatusType] (
-	Id int PRIMARY KEY,
-	Name nvarchar(50) NOT NULL
+	[Id] int PRIMARY KEY,
+	[Name] nvarchar(50) NOT NULL
 );
 GO
 
 CREATE TABLE [ProjectStatus] (
-	Id int IDENTITY(1,1) PRIMARY KEY,
-	ProjectId int NOT NULL
-	FOREIGN KEY REFERENCES [Project](Id),
-	StatusTypeId int DEFAULT 10 NOT NULL
-	FOREIGN KEY REFERENCES [ProjectStatusType](Id),
-	DateModified datetime DEFAULT GETDATE(),
-	ApproverId int NULL
-	FOREIGN KEY REFERENCES [User](Id),
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[ProjectId] int NOT NULL
+	FOREIGN KEY REFERENCES [Project]([Id]),
+	[StatusTypeId] int DEFAULT 10 NOT NULL
+	FOREIGN KEY REFERENCES [ProjectStatusType]([Id]),
+	[DateModified] datetime DEFAULT GETDATE(),
+	[ApproverId] int NULL
+	FOREIGN KEY REFERENCES [User]([Id]),
 	CONSTRAINT [CK_ProjectStatus_ApproverIsAdmin]
 	CHECK (
 		[ApproverId] IS NULL OR [ApproverId] IN (
@@ -80,31 +80,31 @@ CREATE TABLE [ProjectStatus] (
 GO
 
 CREATE TABLE [Comment] (
-	Id int IDENTITY(1,1) PRIMARY KEY,
-	DateCreated datetime DEFAULT GETDATE(),
-	Content nvarchar(max) NOT NULL,
-	UserId int NOT NULL
-	FOREIGN KEY REFERENCES [User](Id),
-	ProjectId int NOT NULL
-	FOREIGN KEY REFERENCES [Project](Id),
-	ParentCommentId int NULL
-	FOREIGN KEY REFERENCES [Comment](Id)
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[DateCreated] datetime DEFAULT GETDATE(),
+	[Content] nvarchar(max) NOT NULL,
+	[UserId] int NOT NULL
+	FOREIGN KEY REFERENCES [User]([Id]),
+	[ProjectId] int NOT NULL
+	FOREIGN KEY REFERENCES [Project]([Id]),
+	[ParentCommentId] int NULL
+	FOREIGN KEY REFERENCES [Comment]([Id])
 );
 GO
 
 CREATE TABLE [Log] (
-	Id int IDENTITY(1,1) PRIMARY KEY,
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[Timestamp] datetime DEFAULT GETDATE(),
-	Level nvarchar(50) NOT NULL,
-	Message nvarchar(max) NOT NULL
+	[Level] nvarchar(50) NOT NULL,
+	[Message] nvarchar(max) NOT NULL
 );
 GO
 
-INSERT INTO [UserRole](Id, Name) VALUES (10, 'User');
-INSERT INTO [UserRole](Id, Name) VALUES (100, 'Admin');
+INSERT INTO [UserRole]([Id], [Name]) VALUES (10, 'User');
+INSERT INTO [UserRole]([Id], [Name]) VALUES (100, 'Admin');
 GO
 
-INSERT INTO [ProjectStatusType](Id, Name) VALUES (10, 'Pending');
-INSERT INTO [ProjectStatusType](Id, Name) VALUES (20, 'Approved');
-INSERT INTO [ProjectStatusType](Id, Name) VALUES (30, 'Rejected');
+INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (10, 'Pending');
+INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (20, 'Approved');
+INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (30, 'Rejected');
 GO
