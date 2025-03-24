@@ -1,8 +1,8 @@
-CREATE DATABASE dbDiyProjectPlatform;
-GO
+-- CREATE DATABASE dbDiyProjectPlatform;
+-- GO
 
-USE dbDiyProjectPlatform;
-GO
+-- USE dbDiyProjectPlatform;
+-- GO
 
 CREATE TABLE [UserRole] (
 	[Id] int PRIMARY KEY,
