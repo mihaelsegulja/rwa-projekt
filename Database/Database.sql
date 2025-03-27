@@ -27,6 +27,12 @@ CREATE TABLE [Topic] (
 );
 GO
 
+CREATE TABLE [DifficultyLevel] (
+    [Id] int PRIMARY KEY,
+    [Name] nvarchar(50) NOT NULL
+);
+GO
+
 CREATE TABLE [Project] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[Title] nvarchar(255) NOT NULL,
@@ -37,6 +43,8 @@ CREATE TABLE [Project] (
 	FOREIGN KEY REFERENCES [Topic]([Id]),
 	[UserId] int NOT NULL
 	FOREIGN KEY REFERENCES [User]([Id]),
+	[DifficultyLevelId] int NOT NULL
+	FOREIGN KEY REFERENCES [DifficultyLevel]([Id])
 );
 GO
 
@@ -102,6 +110,12 @@ GO
 
 INSERT INTO [UserRole]([Id], [Name]) VALUES (10, 'User');
 INSERT INTO [UserRole]([Id], [Name]) VALUES (100, 'Admin');
+GO
+
+INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES (10, 'Beginner');
+INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES (20, 'Intermediate');
+INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES (30, 'Advanced');
+INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES (40, 'Expert');
 GO
 
 INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (10, 'Pending');
