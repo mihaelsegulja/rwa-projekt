@@ -12,9 +12,13 @@ GO
 
 CREATE TABLE [User] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[FirstName] nvarchar(255) NOT NULL,
+	[LastName] nvarchar(255) NOT NULL,
 	[Username] nvarchar(255) NOT NULL,
 	[Email] nvarchar(255) NOT NULL,
-	[Password] nvarchar(255) NOT NULL,
+	[PwdHash] nvarchar(255) NOT NULL,
+	[PwdSalt] nvarchar(255) NOT NULL,
+	[Phone] nvarchar(255) NULL,
 	[ProfilePicture] nvarchar(max) NULL,
 	[UserRoleId] int DEFAULT 10 NOT NULL
 	FOREIGN KEY REFERENCES [UserRole]([Id])
@@ -36,8 +40,8 @@ GO
 CREATE TABLE [Project] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[Title] nvarchar(255) NOT NULL,
-	[DateCreated] datetime DEFAULT GETDATE(),
-	[Description] nvarchar(200) NOT NULL,
+	[DateCreated] datetime2 DEFAULT GETUTCDATE(),
+	[Description] nvarchar(255) NOT NULL,
 	[Content] nvarchar(max) NOT NULL,
 	[TopicId] int NOT NULL
 	FOREIGN KEY REFERENCES [Topic]([Id]),
@@ -83,7 +87,7 @@ CREATE TABLE [ProjectStatus] (
 	FOREIGN KEY REFERENCES [Project]([Id]),
 	[StatusTypeId] int DEFAULT 10 NOT NULL
 	FOREIGN KEY REFERENCES [ProjectStatusType]([Id]),
-	[DateModified] datetime DEFAULT GETDATE(),
+	[DateModified] datetime2 DEFAULT GETUTCDATE(),
 	[ApproverId] int NULL
 	FOREIGN KEY REFERENCES [User]([Id]),
 	CONSTRAINT [CK_ProjectStatus_ApproverIsAdmin]
@@ -97,7 +101,7 @@ GO
 
 CREATE TABLE [Comment] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
-	[DateCreated] datetime DEFAULT GETDATE(),
+	[DateCreated] datetime2 DEFAULT GETUTCDATE(),
 	[Content] nvarchar(max) NOT NULL,
 	[UserId] int NOT NULL
 	FOREIGN KEY REFERENCES [User]([Id]),
@@ -110,7 +114,7 @@ GO
 
 CREATE TABLE [Log] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
-	[Timestamp] datetime DEFAULT GETDATE(),
+	[Timestamp] datetime2 DEFAULT GETUTCDATE(),
 	[Level] nvarchar(50) NOT NULL,
 	[Message] nvarchar(max) NOT NULL
 );
