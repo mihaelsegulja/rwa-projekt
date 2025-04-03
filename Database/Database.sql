@@ -48,6 +48,14 @@ CREATE TABLE [Project] (
 );
 GO
 
+CREATE TABLE [ProjectImage] (
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[ProjectId] int NOT NULL
+	FOREIGN KEY REFERENCES [Project]([Id]),
+	[Image] nvarchar(max) NOT NULL
+);
+GO
+
 CREATE TABLE [Material] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[Name] nvarchar(255) NOT NULL
