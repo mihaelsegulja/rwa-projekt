@@ -14,12 +14,13 @@ CREATE TABLE [User] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[FirstName] nvarchar(255) NOT NULL,
 	[LastName] nvarchar(255) NOT NULL,
-	[Username] nvarchar(255) NOT NULL,
+	[Username] nvarchar(50) NOT NULL,
 	[Email] nvarchar(255) NOT NULL,
-	[PwdHash] nvarchar(255) NOT NULL,
-	[PwdSalt] nvarchar(255) NOT NULL,
+	[PasswordHash] nvarchar(255) NOT NULL,
+	[PasswordSalt] nvarchar(255) NOT NULL,
 	[Phone] nvarchar(255) NULL,
 	[ProfilePicture] nvarchar(max) NULL,
+	[SecurityToken] nvarchar(255) NULL,
 	[UserRoleId] int DEFAULT 10 NOT NULL
 	FOREIGN KEY REFERENCES [UserRole]([Id])
 );
