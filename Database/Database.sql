@@ -1,13 +1,13 @@
--- CREATE DATABASE dbDiyProjectPlatform;
+-- CREATE DATABASE dbDiyProjectPlatform
 -- GO
 
--- USE dbDiyProjectPlatform;
+-- USE dbDiyProjectPlatform
 -- GO
 
 CREATE TABLE [UserRole] (
 	[Id] int PRIMARY KEY,
 	[Name] nvarchar(50) NOT NULL
-);
+)
 GO
 
 CREATE TABLE [User] (
@@ -22,19 +22,19 @@ CREATE TABLE [User] (
 	[ProfilePicture] nvarchar(max) NULL,
 	[UserRoleId] int DEFAULT 10 NOT NULL
 	FOREIGN KEY REFERENCES [UserRole]([Id])
-);
+)
 GO
 
 CREATE TABLE [Topic] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[Name] nvarchar(255) NOT NULL
-);
+)
 GO
 
 CREATE TABLE [DifficultyLevel] (
     [Id] int PRIMARY KEY,
     [Name] nvarchar(50) NOT NULL
-);
+)
 GO
 
 CREATE TABLE [Project] (
@@ -49,7 +49,7 @@ CREATE TABLE [Project] (
 	FOREIGN KEY REFERENCES [User]([Id]),
 	[DifficultyLevelId] int NOT NULL
 	FOREIGN KEY REFERENCES [DifficultyLevel]([Id])
-);
+)
 GO
 
 CREATE TABLE [ProjectImage] (
@@ -57,13 +57,13 @@ CREATE TABLE [ProjectImage] (
 	[ProjectId] int NOT NULL
 	FOREIGN KEY REFERENCES [Project]([Id]),
 	[Image] nvarchar(max) NOT NULL
-);
+)
 GO
 
 CREATE TABLE [Material] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[Name] nvarchar(255) NOT NULL
-);
+)
 GO
 
 CREATE TABLE [ProjectMaterial] (
@@ -72,13 +72,13 @@ CREATE TABLE [ProjectMaterial] (
 	FOREIGN KEY REFERENCES [Project]([Id]),
 	[MaterialId] int NOT NULL
 	FOREIGN KEY REFERENCES [Material]([Id])
-);
+)
 GO
 
 CREATE TABLE [ProjectStatusType] (
 	[Id] int PRIMARY KEY,
 	[Name] nvarchar(50) NOT NULL
-);
+)
 GO
 
 CREATE TABLE [ProjectStatus] (
@@ -89,14 +89,8 @@ CREATE TABLE [ProjectStatus] (
 	FOREIGN KEY REFERENCES [ProjectStatusType]([Id]),
 	[DateModified] datetime2 DEFAULT GETUTCDATE(),
 	[ApproverId] int NULL
-	FOREIGN KEY REFERENCES [User]([Id]),
-	CONSTRAINT [CK_ProjectStatus_ApproverIsAdmin]
-	CHECK (
-		[ApproverId] IS NULL OR [ApproverId] IN (
-			SELECT [Id] FROM [User] WHERE [UserRoleId] = 100
-		)
-	)
-);
+	FOREIGN KEY REFERENCES [User]([Id])
+)
 GO
 
 CREATE TABLE [Comment] (
@@ -109,7 +103,7 @@ CREATE TABLE [Comment] (
 	FOREIGN KEY REFERENCES [Project]([Id]),
 	[ParentCommentId] int NULL
 	FOREIGN KEY REFERENCES [Comment]([Id])
-);
+)
 GO
 
 CREATE TABLE [Log] (
@@ -117,7 +111,7 @@ CREATE TABLE [Log] (
 	[Timestamp] datetime2 DEFAULT GETUTCDATE(),
 	[Level] nvarchar(50) NOT NULL,
 	[Message] nvarchar(max) NOT NULL
-);
+)
 GO
 
 INSERT INTO [UserRole]([Id], [Name]) VALUES (10, 'User');
