@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DbDiyProjectPlatformContext>(options => {
-    options.UseSqlServer("name=ConnectionStrings:Exercise4ConnStr");
+    options.UseSqlServer("name=ConnectionStrings:DefaultConnection");
 });
 
 var app = builder.Build();
