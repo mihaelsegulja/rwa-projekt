@@ -9,5 +9,10 @@ namespace WebAPI.Controllers;
 [ApiController]
 public class ProjectController : ControllerBase
 {
-
+    private readonly DbDiyProjectPlatformContext _context;
+    
+    public ProjectController(DbDiyProjectPlatformContext context)
+    {
+        _context = context;
+    }
 }
