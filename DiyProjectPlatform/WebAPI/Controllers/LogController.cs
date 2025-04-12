@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebAPI.Dtos;
 using WebAPI.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -9,10 +10,10 @@ namespace WebAPI.Controllers;
 [ApiController]
 public class LogController : ControllerBase
 {
-    private readonly DbDiyProjectPlatformContext _context;
+    private readonly DbDiyProjectPlatformContext _dbContext;
     
-    public LogController(DbDiyProjectPlatformContext context)
+    public LogController(DbDiyProjectPlatformContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
 }

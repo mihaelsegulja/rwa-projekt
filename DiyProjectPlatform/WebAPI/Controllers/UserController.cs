@@ -9,10 +9,10 @@ namespace WebAPI.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly DbDiyProjectPlatformContext _context;
+    private readonly DbDiyProjectPlatformContext _dbContext;
     
-    public UserController(DbDiyProjectPlatformContext context)
+    public UserController(DbDiyProjectPlatformContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
 }
