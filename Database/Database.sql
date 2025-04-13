@@ -21,6 +21,9 @@ CREATE TABLE [User] (
 	[Phone] nvarchar(255) NULL,
 	[ProfilePicture] nvarchar(max) NULL,
 	[SecurityToken] nvarchar(255) NULL,
+	[IsActive] bit NOT NULL DEFAULT 1,
+    [DateCreated] datetime2 NOT NULL DEFAULT GETUTCDATE(),
+    [DateDeleted] datetime2 NULL,
 	[UserRoleId] int DEFAULT 10 NOT NULL
 	FOREIGN KEY REFERENCES [UserRole]([Id])
 )
@@ -41,7 +44,7 @@ GO
 CREATE TABLE [Project] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[Title] nvarchar(255) NOT NULL,
-	[DateCreated] datetime2 DEFAULT GETUTCDATE(),
+	[DateCreated] datetime2 NOT NULL DEFAULT GETUTCDATE(),
 	[Description] nvarchar(255) NOT NULL,
 	[Content] nvarchar(max) NOT NULL,
 	[TopicId] int NOT NULL
@@ -88,7 +91,7 @@ CREATE TABLE [ProjectStatus] (
 	FOREIGN KEY REFERENCES [Project]([Id]),
 	[StatusTypeId] int DEFAULT 10 NOT NULL
 	FOREIGN KEY REFERENCES [ProjectStatusType]([Id]),
-	[DateModified] datetime2 DEFAULT GETUTCDATE(),
+	[DateModified] datetime2 NOT NULL DEFAULT GETUTCDATE(),
 	[ApproverId] int NULL
 	FOREIGN KEY REFERENCES [User]([Id])
 )
@@ -96,7 +99,7 @@ GO
 
 CREATE TABLE [Comment] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
-	[DateCreated] datetime2 DEFAULT GETUTCDATE(),
+	[DateCreated] datetime2 NOT NULL DEFAULT GETUTCDATE(),
 	[Content] nvarchar(max) NOT NULL,
 	[UserId] int NOT NULL
 	FOREIGN KEY REFERENCES [User]([Id]),
@@ -109,7 +112,7 @@ GO
 
 CREATE TABLE [Log] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
-	[Timestamp] datetime2 DEFAULT GETUTCDATE(),
+	[Timestamp] datetime2 NOT NULL DEFAULT GETUTCDATE(),
 	[Level] nvarchar(50) NOT NULL,
 	[Message] nvarchar(max) NOT NULL
 )
@@ -128,4 +131,5 @@ GO
 INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (10, 'Pending');
 INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (20, 'Approved');
 INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (30, 'Rejected');
+INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (40, 'Deleted');
 GO
