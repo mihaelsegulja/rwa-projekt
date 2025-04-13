@@ -11,7 +11,7 @@ public partial class ProjectStatus
 
     public int StatusTypeId { get; set; }
 
-    public DateTime? DateModified { get; set; }
+    public DateTime DateModified { get; set; }
 
     public int? ApproverId { get; set; }
 

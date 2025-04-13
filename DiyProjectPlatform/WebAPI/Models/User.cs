@@ -25,6 +25,12 @@ public partial class User
 
     public string? SecurityToken { get; set; }
 
+    public bool IsActive { get; set; }
+
+    public DateTime DateCreated { get; set; }
+
+    public DateTime? DateDeleted { get; set; }
+
     public int UserRoleId { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();

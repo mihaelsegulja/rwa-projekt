@@ -46,7 +46,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
     {
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC07135AC0F9");
+            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC07E1BDC8E4");
 
             entity.ToTable("Comment");
 
@@ -54,22 +54,22 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
             entity.HasOne(d => d.ParentComment).WithMany(p => p.InverseParentComment)
                 .HasForeignKey(d => d.ParentCommentId)
-                .HasConstraintName("FK__Comment__ParentC__5AEE82B9");
+                .HasConstraintName("FK__Comment__ParentC__5CD6CB2B");
 
             entity.HasOne(d => d.Project).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comment__Project__59FA5E80");
+                .HasConstraintName("FK__Comment__Project__5BE2A6F2");
 
             entity.HasOne(d => d.User).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comment__UserId__59063A47");
+                .HasConstraintName("FK__Comment__UserId__5AEE82B9");
         });
 
         modelBuilder.Entity<DifficultyLevel>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Difficul__3214EC07B5D1BB97");
+            entity.HasKey(e => e.Id).HasName("PK__Difficul__3214EC07503F2568");
 
             entity.ToTable("DifficultyLevel");
 
@@ -79,7 +79,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<Log>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Log__3214EC07B8BD293F");
+            entity.HasKey(e => e.Id).HasName("PK__Log__3214EC075E3EC0F9");
 
             entity.ToTable("Log");
 
@@ -89,7 +89,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<Material>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Material__3214EC07765FAF00");
+            entity.HasKey(e => e.Id).HasName("PK__Material__3214EC07D9A3F746");
 
             entity.ToTable("Material");
 
@@ -98,7 +98,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<Project>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Project__3214EC07E84CAA45");
+            entity.HasKey(e => e.Id).HasName("PK__Project__3214EC0720531271");
 
             entity.ToTable("Project");
 
@@ -109,51 +109,51 @@ public partial class DbDiyProjectPlatformContext : DbContext
             entity.HasOne(d => d.DifficultyLevel).WithMany(p => p.Projects)
                 .HasForeignKey(d => d.DifficultyLevelId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Project__Difficu__440B1D61");
+                .HasConstraintName("FK__Project__Difficu__45F365D3");
 
             entity.HasOne(d => d.Topic).WithMany(p => p.Projects)
                 .HasForeignKey(d => d.TopicId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Project__TopicId__4222D4EF");
+                .HasConstraintName("FK__Project__TopicId__440B1D61");
 
             entity.HasOne(d => d.User).WithMany(p => p.Projects)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Project__UserId__4316F928");
+                .HasConstraintName("FK__Project__UserId__44FF419A");
         });
 
         modelBuilder.Entity<ProjectImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectI__3214EC07063E0FC4");
+            entity.HasKey(e => e.Id).HasName("PK__ProjectI__3214EC075ABCA0B4");
 
             entity.ToTable("ProjectImage");
 
             entity.HasOne(d => d.Project).WithMany(p => p.ProjectImages)
                 .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ProjectIm__Proje__46E78A0C");
+                .HasConstraintName("FK__ProjectIm__Proje__48CFD27E");
         });
 
         modelBuilder.Entity<ProjectMaterial>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectM__3214EC07AEE9AD19");
+            entity.HasKey(e => e.Id).HasName("PK__ProjectM__3214EC074736132F");
 
             entity.ToTable("ProjectMaterial");
 
             entity.HasOne(d => d.Material).WithMany(p => p.ProjectMaterials)
                 .HasForeignKey(d => d.MaterialId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ProjectMa__Mater__4CA06362");
+                .HasConstraintName("FK__ProjectMa__Mater__4E88ABD4");
 
             entity.HasOne(d => d.Project).WithMany(p => p.ProjectMaterials)
                 .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ProjectMa__Proje__4BAC3F29");
+                .HasConstraintName("FK__ProjectMa__Proje__4D94879B");
         });
 
         modelBuilder.Entity<ProjectStatus>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectS__3214EC07283B15C3");
+            entity.HasKey(e => e.Id).HasName("PK__ProjectS__3214EC07A699D355");
 
             entity.ToTable("ProjectStatus");
 
@@ -162,22 +162,22 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
             entity.HasOne(d => d.Approver).WithMany(p => p.ProjectStatuses)
                 .HasForeignKey(d => d.ApproverId)
-                .HasConstraintName("FK__ProjectSt__Appro__5535A963");
+                .HasConstraintName("FK__ProjectSt__Appro__571DF1D5");
 
             entity.HasOne(d => d.Project).WithMany(p => p.ProjectStatuses)
                 .HasForeignKey(d => d.ProjectId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ProjectSt__Proje__5165187F");
+                .HasConstraintName("FK__ProjectSt__Proje__534D60F1");
 
             entity.HasOne(d => d.StatusType).WithMany(p => p.ProjectStatuses)
                 .HasForeignKey(d => d.StatusTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ProjectSt__Statu__534D60F1");
+                .HasConstraintName("FK__ProjectSt__Statu__5535A963");
         });
 
         modelBuilder.Entity<ProjectStatusType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectS__3214EC07C5179C9A");
+            entity.HasKey(e => e.Id).HasName("PK__ProjectS__3214EC072C625A90");
 
             entity.ToTable("ProjectStatusType");
 
@@ -187,7 +187,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<Topic>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Topic__3214EC07FA3AE484");
+            entity.HasKey(e => e.Id).HasName("PK__Topic__3214EC07ADCF44B6");
 
             entity.ToTable("Topic");
 
@@ -196,12 +196,14 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__User__3214EC0717D30DA6");
+            entity.HasKey(e => e.Id).HasName("PK__User__3214EC07E86927E4");
 
             entity.ToTable("User");
 
+            entity.Property(e => e.DateCreated).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.FirstName).HasMaxLength(255);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.LastName).HasMaxLength(255);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.PasswordSalt).HasMaxLength(255);
@@ -213,12 +215,12 @@ public partial class DbDiyProjectPlatformContext : DbContext
             entity.HasOne(d => d.UserRole).WithMany(p => p.Users)
                 .HasForeignKey(d => d.UserRoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User__UserRoleId__3A81B327");
+                .HasConstraintName("FK__User__UserRoleId__3C69FB99");
         });
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__UserRole__3214EC07A97A8781");
+            entity.HasKey(e => e.Id).HasName("PK__UserRole__3214EC07B9EA1E7C");
 
             entity.ToTable("UserRole");
 

@@ -9,7 +9,7 @@ public partial class Project
 
     public string Title { get; set; } = null!;
 
-    public DateTime? DateCreated { get; set; }
+    public DateTime DateCreated { get; set; }
 
     public string Description { get; set; } = null!;
 
