@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Dtos;
 using WebAPI.Models;
@@ -21,7 +22,7 @@ public class UserController : ControllerBase
         _mapper = mapper;
     } 
     
-    [HttpPost("[action]")]
+    [HttpPost("register")]
     public ActionResult Register(UserRegisterDto registerDto)
     {
         try
@@ -53,7 +54,7 @@ public class UserController : ControllerBase
         }
     }
 
-    [HttpPost("[action]")]
+    [HttpPost("login")]
     public ActionResult Login(UserLoginDto loginDto)
     {
         try
@@ -75,9 +76,59 @@ public class UserController : ControllerBase
             
             var secureKey = _configuration["JWT:SecureKey"];
             var expirationTime = int.Parse(_configuration["JWT:ExpiryInMinutes"]);
-            var serializedToken = JwtTokenHelper.CreateToken(secureKey, expirationTime, loginDto.Username, userRole.Name);
+            var serializedToken = JwtTokenHelper.CreateToken(secureKey, expirationTime, loginDto.Username, existingUser.Id.ToString(), userRole.Name);
 
             return Ok(serializedToken);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [Authorize]
+    [HttpDelete("delete")]
+    public ActionResult DeleteUser(int id)
+    {
+        try
+        {
+            // Get the ID of the currently authenticated user
+            var currentUserId = int.Parse(User.Claims.First(c => c.Type == "sub").Value);
+
+            // Check if the user is trying to delete themselves
+            if (currentUserId == id)
+                return BadRequest("You cannot delete your own account.");
+
+            // Find the user by ID
+            var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
+            if (user == null)
+                return NotFound($"User with ID {id} not found");
+
+            // Perform a soft delete by setting IsActive to false and setting DateDeleted
+            user.DateDeleted = DateTime.UtcNow;
+            user.IsActive = false;
+
+            _dbContext.SaveChanges();
+
+            return Ok("User has been deleted");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
+    // TODO: Add pagination
+    [Authorize]
+    [HttpGet("all")]
+    public ActionResult<IEnumerable<UserDto>> GetAllUsers()
+    {
+        try
+        {
+            var users = _dbContext.Users
+                .Where(u => u.IsActive)
+                .ToList();
+            return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
         }
         catch (Exception ex)
         {

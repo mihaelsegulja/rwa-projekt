@@ -7,7 +7,8 @@ namespace WebAPI.Security;
 
 public class JwtTokenHelper
 {
-    public static string CreateToken(string secureKey, int expiration, string subject = null, string role = null)
+    // TODO: move params to JwtTokenOptions class
+    public static string CreateToken(string secureKey, int expiration, string name = null, string subject = null, string role = null)
     {
         // Get secret key bytes
         var tokenKey = Encoding.UTF8.GetBytes(secureKey);
@@ -23,11 +24,11 @@ public class JwtTokenHelper
 
         if (!string.IsNullOrEmpty(subject))
         {
-            tokenDescriptor.Subject = new ClaimsIdentity(new System.Security.Claims.Claim[]
+            tokenDescriptor.Subject = new ClaimsIdentity(new Claim[]
             {
-                new System.Security.Claims.Claim(ClaimTypes.Name, subject),
-                new System.Security.Claims.Claim(JwtRegisteredClaimNames.Sub, subject),
-                new System.Security.Claims.Claim(ClaimTypes.Role, role)
+                new Claim(ClaimTypes.Name, name ?? subject),
+                new Claim(JwtRegisteredClaimNames.Sub, subject),
+                new Claim(ClaimTypes.Role, role)
             });
         }
 
