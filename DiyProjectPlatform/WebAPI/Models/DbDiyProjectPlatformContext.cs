@@ -46,7 +46,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
     {
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC07E1BDC8E4");
+            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC077B14C215");
 
             entity.ToTable("Comment");
 
@@ -69,7 +69,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<DifficultyLevel>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Difficul__3214EC07503F2568");
+            entity.HasKey(e => e.Id).HasName("PK__Difficul__3214EC07E04C21BD");
 
             entity.ToTable("DifficultyLevel");
 
@@ -79,7 +79,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<Log>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Log__3214EC075E3EC0F9");
+            entity.HasKey(e => e.Id).HasName("PK__Log__3214EC070AF70284");
 
             entity.ToTable("Log");
 
@@ -89,7 +89,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<Material>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Material__3214EC07D9A3F746");
+            entity.HasKey(e => e.Id).HasName("PK__Material__3214EC0738CCBB11");
 
             entity.ToTable("Material");
 
@@ -98,7 +98,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<Project>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Project__3214EC0720531271");
+            entity.HasKey(e => e.Id).HasName("PK__Project__3214EC07DF0AB82E");
 
             entity.ToTable("Project");
 
@@ -124,7 +124,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<ProjectImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectI__3214EC075ABCA0B4");
+            entity.HasKey(e => e.Id).HasName("PK__ProjectI__3214EC074F985887");
 
             entity.ToTable("ProjectImage");
 
@@ -136,7 +136,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<ProjectMaterial>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectM__3214EC074736132F");
+            entity.HasKey(e => e.Id).HasName("PK__ProjectM__3214EC0736170E7F");
 
             entity.ToTable("ProjectMaterial");
 
@@ -153,7 +153,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<ProjectStatus>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectS__3214EC07A699D355");
+            entity.HasKey(e => e.Id).HasName("PK__ProjectS__3214EC07983CFE93");
 
             entity.ToTable("ProjectStatus");
 
@@ -177,7 +177,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<ProjectStatusType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ProjectS__3214EC072C625A90");
+            entity.HasKey(e => e.Id).HasName("PK__ProjectS__3214EC079BF7BCF1");
 
             entity.ToTable("ProjectStatusType");
 
@@ -187,7 +187,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<Topic>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Topic__3214EC07ADCF44B6");
+            entity.HasKey(e => e.Id).HasName("PK__Topic__3214EC07C5BAF8BA");
 
             entity.ToTable("Topic");
 
@@ -196,7 +196,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__User__3214EC07E86927E4");
+            entity.HasKey(e => e.Id).HasName("PK__User__3214EC07742FED08");
 
             entity.ToTable("User");
 
@@ -220,7 +220,7 @@ public partial class DbDiyProjectPlatformContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__UserRole__3214EC07B9EA1E7C");
+            entity.HasKey(e => e.Id).HasName("PK__UserRole__3214EC071C37B8B8");
 
             entity.ToTable("UserRole");
 
