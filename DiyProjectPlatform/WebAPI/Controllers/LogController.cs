@@ -25,7 +25,7 @@ public class LogController : ControllerBase
     /// Get last N logs
     /// </summary>
     /// <param name="n">Number of logs</param>
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpGet("get/{n}")]
     public async Task<ActionResult<IEnumerable<LogDto>>> GetLastNLogs(int n)
     {
@@ -47,7 +47,7 @@ public class LogController : ControllerBase
     /// <summary>
     /// Get total log count
     /// </summary>
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetLogCount()
     {

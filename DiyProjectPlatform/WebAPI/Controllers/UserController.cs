@@ -62,7 +62,7 @@ public class UserController : ControllerBase
             var genericLoginFail = "Incorrect username or password";
 
             // Try to get a user from database
-            var existingUser = _dbContext.Users.FirstOrDefault(x => x.Username == loginDto.Username);
+            var existingUser = _dbContext.Users.FirstOrDefault(x => x.Username == loginDto.Username && x.IsActive);
             if (existingUser == null)
                 return Unauthorized(genericLoginFail);
 
@@ -97,12 +97,12 @@ public class UserController : ControllerBase
 
             // Check if the user is trying to delete themselves
             if (currentUserId == id)
-                return BadRequest("You cannot delete your own account.");
+                return BadRequest("You cannot delete your own account");
 
             // Find the user by ID
             var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
             if (user == null)
-                return NotFound($"User with ID {id} not found");
+                return NotFound($"User not found");
 
             // Perform a soft delete by setting IsActive to false and setting DateDeleted
             user.DateDeleted = DateTime.UtcNow;
