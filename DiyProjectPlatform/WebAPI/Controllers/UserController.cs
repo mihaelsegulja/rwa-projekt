@@ -102,11 +102,11 @@ public class UserController : ControllerBase
             // Find the user by ID
             var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
             if (user == null)
-                return NotFound($"User not found");
+                return NotFound("User not found");
 
             // Perform a soft delete by setting IsActive to false and setting DateDeleted
-            user.DateDeleted = DateTime.UtcNow;
             user.IsActive = false;
+            user.DateDeleted = DateTime.UtcNow;
 
             _dbContext.SaveChanges();
 
@@ -118,15 +118,16 @@ public class UserController : ControllerBase
         }
     }
     
-    // TODO: Add pagination
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpGet("all")]
-    public ActionResult<IEnumerable<UserDto>> GetAllUsers()
+    public ActionResult<IEnumerable<UserDto>> GetAllUsers(int page = 1, int pageSize = 10)
     {
         try
         {
             var users = _dbContext.Users
                 .Where(u => u.IsActive)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
             return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
         }
