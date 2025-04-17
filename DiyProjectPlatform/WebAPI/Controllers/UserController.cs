@@ -73,10 +73,8 @@ public class UserController : ControllerBase
 
             // Find user role
             var userRole = _dbContext.UserRoles.FirstOrDefault(ur => existingUser.UserRoleId == ur.Id);
-            
-            var secureKey = _configuration["JWT:SecureKey"];
-            var expirationTime = int.Parse(_configuration["JWT:ExpiryInMinutes"]);
-            var serializedToken = JwtTokenHelper.CreateToken(secureKey, expirationTime, loginDto.Username, existingUser.Id.ToString(), userRole.Name);
+
+            var serializedToken = JwtTokenHelper.CreateToken(loginDto.Username, existingUser.Id.ToString(), userRole.Name);
 
             return Ok(serializedToken);
         }

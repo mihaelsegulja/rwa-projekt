@@ -14,8 +14,7 @@ public class LogController : ControllerBase
     private readonly DbDiyProjectPlatformContext _dbContext;
     private readonly IMapper _mapper;
     
-    public LogController
-    (DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public LogController(DbDiyProjectPlatformContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
         _mapper = mapper;

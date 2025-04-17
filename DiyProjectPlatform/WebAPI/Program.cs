@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WebAPI.Config;
 using WebAPI.Mappings;
 using WebAPI.Models;
 
@@ -47,6 +48,11 @@ builder.Services.AddDbContext<DbDiyProjectPlatformContext>(options => {
     options.UseSqlServer("name=ConnectionStrings:DefaultConnection");
 });
 
+JWTTokenConfig.TokenSecret = builder.Configuration["JWT:SecureKey"];
+JWTTokenConfig.TokenIssuer = builder.Configuration["JWT:Issuer"];
+JWTTokenConfig.TokenAudience = builder.Configuration["JWT:Audience"];
+JWTTokenConfig.TokenExpiration = int.Parse(builder.Configuration["JWT:ExpiryInMinutes"]);
+
 // Configure JWT security services
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -55,7 +61,8 @@ builder.Services
         {
             ValidateIssuer = false,
             ValidateAudience = false,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SecureKey"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JWTTokenConfig.TokenSecret))
+
         };
     });
 
