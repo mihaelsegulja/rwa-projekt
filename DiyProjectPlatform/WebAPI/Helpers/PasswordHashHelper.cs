@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
-namespace WebAPI.Security;
+namespace WebAPI.Helpers;
 
 public class PasswordHashHelper
 {
@@ -13,9 +13,9 @@ public class PasswordHashHelper
         return b64Salt;
     }
 
-    public static string GetHash(string password, string b64salt)
+    public static string GetHash(string password, string b64Salt)
     {
-        byte[] salt = Convert.FromBase64String(b64salt);
+        byte[] salt = Convert.FromBase64String(b64Salt);
 
         byte[] hash =
             KeyDerivation.Pbkdf2(

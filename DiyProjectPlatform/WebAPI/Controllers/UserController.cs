@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Dtos;
+using WebAPI.Helpers;
 using WebAPI.Models;
-using WebAPI.Security;
 
 namespace WebAPI.Controllers;
 
@@ -12,13 +12,11 @@ namespace WebAPI.Controllers;
 public class UserController : ControllerBase
 {
     private readonly DbDiyProjectPlatformContext _dbContext;
-    private readonly IConfiguration _configuration;
     private readonly IMapper _mapper;
 
-    public UserController(DbDiyProjectPlatformContext dbContext, IConfiguration configuration, IMapper mapper)
+    public UserController(DbDiyProjectPlatformContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
-        _configuration = configuration;
         _mapper = mapper;
     } 
     
@@ -33,13 +31,13 @@ public class UserController : ControllerBase
                 return BadRequest($"Username {trimmedUsername} already exists");
 
             // Hash the password
-            var b64salt = PasswordHashHelper.GetSalt();
-            var b64hash = PasswordHashHelper.GetHash(registerDto.Password, b64salt);
+            var b64Salt = PasswordHashHelper.GetSalt();
+            var b64Hash = PasswordHashHelper.GetHash(registerDto.Password, b64Salt);
 
             // Create user from DTO and hashed password
             var user = _mapper.Map<User>(registerDto);
-            user.PasswordHash = b64hash;
-            user.PasswordSalt = b64salt;
+            user.PasswordHash = b64Hash;
+            user.PasswordSalt = b64Salt;
             user.IsActive = true;
 
             // Add user and save changes to database
@@ -67,8 +65,8 @@ public class UserController : ControllerBase
                 return Unauthorized(genericLoginFail);
 
             // Check if password hash matches
-            var b64hash = PasswordHashHelper.GetHash(loginDto.Password, existingUser.PasswordSalt);
-            if (b64hash != existingUser.PasswordHash)
+            var b64Hash = PasswordHashHelper.GetHash(loginDto.Password, existingUser.PasswordSalt);
+            if (b64Hash != existingUser.PasswordHash)
                 return Unauthorized(genericLoginFail);
 
             // Find user role

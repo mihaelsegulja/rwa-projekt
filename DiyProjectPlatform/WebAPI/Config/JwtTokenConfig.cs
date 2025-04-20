@@ -1,6 +1,6 @@
 ﻿namespace WebAPI.Config;
 
-public static class JWTTokenConfig
+public static class JwtTokenConfig
 {
     public static string TokenSecret { get; set; }
     public static string TokenIssuer { get; set; }

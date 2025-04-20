@@ -48,10 +48,10 @@ builder.Services.AddDbContext<DbDiyProjectPlatformContext>(options => {
     options.UseSqlServer("name=ConnectionStrings:DefaultConnection");
 });
 
-JWTTokenConfig.TokenSecret = builder.Configuration["JWT:SecureKey"];
-JWTTokenConfig.TokenIssuer = builder.Configuration["JWT:Issuer"];
-JWTTokenConfig.TokenAudience = builder.Configuration["JWT:Audience"];
-JWTTokenConfig.TokenExpiration = int.Parse(builder.Configuration["JWT:ExpiryInMinutes"]);
+JwtTokenConfig.TokenSecret = builder.Configuration["JWT:SecureKey"];
+JwtTokenConfig.TokenIssuer = builder.Configuration["JWT:Issuer"];
+JwtTokenConfig.TokenAudience = builder.Configuration["JWT:Audience"];
+JwtTokenConfig.TokenExpiration = int.Parse(builder.Configuration["JWT:ExpiryInMinutes"]);
 
 // Configure JWT security services
 builder.Services
@@ -61,7 +61,7 @@ builder.Services
         {
             ValidateIssuer = false,
             ValidateAudience = false,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JWTTokenConfig.TokenSecret))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtTokenConfig.TokenSecret))
 
         };
     });

@@ -11,6 +11,8 @@ public partial class Project
 
     public DateTime DateCreated { get; set; }
 
+    public DateTime DateModified { get; set; }
+
     public string Description { get; set; } = null!;
 
     public string Content { get; set; } = null!;

@@ -4,19 +4,19 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using WebAPI.Config;
 
-namespace WebAPI.Security;
+namespace WebAPI.Helpers;
 
 public class JwtTokenHelper
 {
-    public static string CreateToken(string name = null, string subject = null, string role = null)
+    public static string CreateToken(string name, string subject, string role)
     {
         // Get secret key bytes
-        var tokenKey = Encoding.UTF8.GetBytes(JWTTokenConfig.TokenSecret);
+        var tokenKey = Encoding.UTF8.GetBytes(JwtTokenConfig.TokenSecret);
 
         // Create a token descriptor (represents a token, kind of a "template" for token)
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Expires = DateTime.UtcNow.AddMinutes(JWTTokenConfig.TokenExpiration),
+            Expires = DateTime.UtcNow.AddMinutes(JwtTokenConfig.TokenExpiration),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(tokenKey),
                 SecurityAlgorithms.HmacSha256Signature)

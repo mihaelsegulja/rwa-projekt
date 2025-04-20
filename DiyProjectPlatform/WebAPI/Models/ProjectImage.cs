@@ -9,7 +9,11 @@ public partial class ProjectImage
 
     public int ProjectId { get; set; }
 
-    public string Image { get; set; } = null!;
+    public int ImageId { get; set; }
+
+    public bool IsMainImage { get; set; }
+
+    public virtual Image Image { get; set; } = null!;
 
     public virtual Project Project { get; set; } = null!;
 }

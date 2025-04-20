@@ -24,7 +24,7 @@ CREATE TABLE [User] (
 	[IsActive] bit NOT NULL DEFAULT 1,
     [DateCreated] datetime2 NOT NULL DEFAULT GETUTCDATE(),
     [DateDeleted] datetime2 NULL,
-	[UserRoleId] int DEFAULT 10 NOT NULL
+	[UserRoleId] int NOT NULL DEFAULT 10
 	FOREIGN KEY REFERENCES [UserRole]([Id])
 )
 GO
@@ -45,6 +45,7 @@ CREATE TABLE [Project] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[Title] nvarchar(255) NOT NULL,
 	[DateCreated] datetime2 NOT NULL DEFAULT GETUTCDATE(),
+	[DateModified] datetime2 NOT NULL DEFAULT GETUTCDATE(),
 	[Description] nvarchar(255) NOT NULL,
 	[Content] nvarchar(max) NOT NULL,
 	[TopicId] int NOT NULL
@@ -56,11 +57,21 @@ CREATE TABLE [Project] (
 )
 GO
 
+CREATE TABLE [Image] (
+	[Id] int IDENTITY(1,1) PRIMARY KEY,
+	[ImageData] nvarchar(max) NOT NULL,
+	[Description] nvarchar(255) NULL,
+	[DateAdded] datetime2 NOT NULL DEFAULT GETUTCDATE(),
+)
+GO
+
 CREATE TABLE [ProjectImage] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[ProjectId] int NOT NULL
 	FOREIGN KEY REFERENCES [Project]([Id]),
-	[Image] nvarchar(max) NOT NULL
+	[ImageId] int NOT NULL
+	FOREIGN KEY REFERENCES [Image]([Id]),
+	[IsMainImage] bit NOT NULL DEFAULT 0
 )
 GO
 
@@ -89,7 +100,7 @@ CREATE TABLE [ProjectStatus] (
 	[Id] int IDENTITY(1,1) PRIMARY KEY,
 	[ProjectId] int NOT NULL
 	FOREIGN KEY REFERENCES [Project]([Id]),
-	[StatusTypeId] int DEFAULT 10 NOT NULL
+	[StatusTypeId] int NOT NULL DEFAULT 10
 	FOREIGN KEY REFERENCES [ProjectStatusType]([Id]),
 	[DateModified] datetime2 NOT NULL DEFAULT GETUTCDATE(),
 	[ApproverId] int NULL
@@ -118,18 +129,21 @@ CREATE TABLE [Log] (
 )
 GO
 
-INSERT INTO [UserRole]([Id], [Name]) VALUES (10, 'User');
-INSERT INTO [UserRole]([Id], [Name]) VALUES (100, 'Admin');
+INSERT INTO [UserRole]([Id], [Name]) VALUES
+	(10, 'User'),
+	(100, 'Admin')
 GO
 
-INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES (10, 'Beginner');
-INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES (20, 'Intermediate');
-INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES (30, 'Advanced');
-INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES (40, 'Expert');
+INSERT INTO [DifficultyLevel]([Id], [Name]) VALUES
+	(10, 'Beginner'),
+	(20, 'Intermediate'),
+	(30, 'Advanced'),
+	(40, 'Expert')
 GO
 
-INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (10, 'Pending');
-INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (20, 'Approved');
-INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (30, 'Rejected');
-INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES (40, 'Deleted');
+INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES
+	(10, 'Pending'),
+	(20, 'Approved'),
+	(30, 'Rejected'),
+	(40, 'Deleted')
 GO

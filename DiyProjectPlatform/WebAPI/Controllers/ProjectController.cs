@@ -15,8 +15,8 @@ public class ProjectController : ControllerBase
         _dbContext = dbContext;
     }
 
-    // TODO: Check project status, show projects with ProjectStatusType.Approved,
-    // also maybe add another method to get pending projects
+    // TODO: Check project status, show projects with ProjectStatusType.Approved
+    // TODO: also maybe add another method to get pending projects (GetAllPendingProjects, or GetAllProjectsAndStatuses)
 
     [Authorize]
     [HttpGet("all")]
