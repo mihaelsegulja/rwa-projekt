@@ -1,10 +1,9 @@
-﻿namespace WebAPI.Enums
+﻿namespace WebAPI.Enums;
+
+public enum DifficultyLevel
 {
-    public enum DifficultyLevel
-    {
-        Beginner = 10,
-        Intermediate = 20,
-        Advanced = 30,
-        Expert = 40
-    }
+    Beginner = 10,
+    Intermediate = 20,
+    Advanced = 30,
+    Expert = 40
 }

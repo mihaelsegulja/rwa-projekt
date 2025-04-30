@@ -1,8 +1,7 @@
-﻿namespace WebAPI.Enums
+﻿namespace WebAPI.Enums;
+
+public enum UserRole
 {
-    public enum UserRole
-    {
-        User = 10,
-        Admin = 100
-    }
+    User = 10,
+    Admin = 100
 }

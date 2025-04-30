@@ -1,10 +1,9 @@
-﻿namespace WebAPI.Enums
+﻿namespace WebAPI.Enums;
+
+public enum ProjectStatusType
 {
-    public enum ProjectStatusType
-    {
-        Pending = 10,
-        Approved = 20,
-        Rejected = 30,
-        Deleted = 40
-    }
+    Pending = 10,
+    Approved = 20,
+    Rejected = 30,
+    Deleted = 40
 }

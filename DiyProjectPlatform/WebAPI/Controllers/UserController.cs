@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using WebAPI.Dtos;
 using WebAPI.Helpers;
 using WebAPI.Models;
@@ -18,8 +20,8 @@ public class UserController : ControllerBase
     {
         _dbContext = dbContext;
         _mapper = mapper;
-    } 
-    
+    }
+
     [HttpPost("register")]
     public ActionResult Register(UserRegisterDto registerDto)
     {
@@ -113,7 +115,7 @@ public class UserController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
-    
+
     [Authorize(Roles = "Admin")]
     [HttpGet("all")]
     public ActionResult<IEnumerable<UserDto>> GetAllUsers(int page = 1, int pageSize = 10)
@@ -126,6 +128,44 @@ public class UserController : ControllerBase
                 .Take(pageSize)
                 .ToList();
             return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [HttpGet("{id}")]
+    public ActionResult<UserDto> GetUserById(int id)
+    {
+        try
+        {
+            var user = _dbContext.Users.FirstOrDefault(x => x.Id == id && x.IsActive);
+            if (user == null)
+                return NotFound("User not found");
+            return Ok(_mapper.Map<UserDto>(user));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [HttpPost("profilepicture")]
+    public ActionResult UpdateProfilePicture([FromBody] string profilePicture)
+    {
+        try
+        {
+            // Get the ID of the currently authenticated user
+            var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            // Find the user by ID
+            var user = _dbContext.Users.FirstOrDefault(x => x.Id == currentUserId);
+            if (user == null)
+                return NotFound("User not found");
+            // Update the profile picture
+            user.ProfilePicture = profilePicture;
+            _dbContext.SaveChanges();
+            return Ok("Profile picture updated");
         }
         catch (Exception ex)
         {

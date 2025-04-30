@@ -9,6 +9,7 @@ namespace WebAPI.Controllers;
 
 [Route("api/log")]
 [ApiController]
+[Authorize(Roles = "Admin")]
 public class LogController : ControllerBase
 {
     private readonly DbDiyProjectPlatformContext _dbContext;
@@ -24,7 +25,6 @@ public class LogController : ControllerBase
     /// Get last N logs
     /// </summary>
     /// <param name="n">Number of logs</param>
-    [Authorize(Roles = "Admin")]
     [HttpGet("get/{n}")]
     public async Task<ActionResult<IEnumerable<LogDto>>> GetLastNLogs(int n)
     {
@@ -46,7 +46,6 @@ public class LogController : ControllerBase
     /// <summary>
     /// Get total log count
     /// </summary>
-    [Authorize(Roles = "Admin")]
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetLogCount()
     {
