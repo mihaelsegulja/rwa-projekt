@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/topic")]
 [ApiController]
 [Authorize]
 public class TopicController : ControllerBase

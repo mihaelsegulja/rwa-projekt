@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using WebAPI.Dtos;
 using WebAPI.Helpers;
@@ -90,22 +89,16 @@ public class UserController : ControllerBase
     {
         try
         {
-            // Get the ID of the currently authenticated user
-            var currentUserId = int.Parse(User.Claims.First(c => c.Type == "sub").Value);
-
-            // Check if the user is trying to delete themselves
+            var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
             if (currentUserId == id)
                 return BadRequest("You cannot delete your own account");
 
-            // Find the user by ID
             var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
             if (user == null)
                 return NotFound("User not found");
 
-            // Perform a soft delete by setting IsActive to false and setting DateDeleted
             user.IsActive = false;
             user.DateDeleted = DateTime.UtcNow;
-
             _dbContext.SaveChanges();
 
             return Ok("User has been deleted");
@@ -151,20 +144,23 @@ public class UserController : ControllerBase
         }
     }
 
-    [HttpPost("profilepicture")]
+    // TODO: Add UpdateProfile where every user property can be updated, except password
+    // Password update will have to go in i.e. UpdatePassword
+    
+    [Authorize]
+    [HttpPut("profilepicture")]
     public ActionResult UpdateProfilePicture([FromBody] string profilePicture)
     {
         try
         {
-            // Get the ID of the currently authenticated user
             var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            // Find the user by ID
             var user = _dbContext.Users.FirstOrDefault(x => x.Id == currentUserId);
             if (user == null)
                 return NotFound("User not found");
-            // Update the profile picture
+            
             user.ProfilePicture = profilePicture;
             _dbContext.SaveChanges();
+            
             return Ok("Profile picture updated");
         }
         catch (Exception ex)

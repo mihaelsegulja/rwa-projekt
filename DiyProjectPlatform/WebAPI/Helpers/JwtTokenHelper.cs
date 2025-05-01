@@ -26,7 +26,7 @@ public class JwtTokenHelper
         {
             tokenDescriptor.Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.Name, name ?? subject),
+                new Claim(ClaimTypes.Name, name),
                 new Claim(JwtRegisteredClaimNames.Sub, subject),
                 new Claim(ClaimTypes.Role, role)
             });

@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Models;
@@ -47,7 +48,32 @@ public class ProjectController : ControllerBase
             var project = _dbContext.Projects.FirstOrDefault(p => p.Id == id);
             if (project == null)
                 return NotFound("Project not found");
+            
             return Ok(project);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpDelete("delete")]
+    public ActionResult DeleteProject(int id)
+    {
+        try
+        { 
+            var projectStatus = _dbContext.ProjectStatuses.FirstOrDefault(ps => ps.ProjectId == id);
+            if (projectStatus == null)
+                return NotFound("Project not found");
+            
+            var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            
+            projectStatus.StatusTypeId = (int)Enums.ProjectStatusType.Deleted;
+            projectStatus.DateModified = DateTime.Now;
+            projectStatus.ApproverId = currentUserId;
+            _dbContext.SaveChanges();
+            
+            return Ok("Project has been deleted");
         }
         catch (Exception e)
         {

@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Models;
 
@@ -45,10 +44,9 @@ public class MaterialController : ControllerBase
         try
         {
             var material = _dbContext.Materials.Find(id);
-            if (material == null)
-            {
+            if (material == null) 
                 return NotFound();
-            }
+            
             return Ok(material);
         }
         catch (Exception e)
@@ -62,10 +60,9 @@ public class MaterialController : ControllerBase
     {
         try
         {
-            if (material == null)
-            {
+            if (material == null) 
                 return BadRequest("Material cannot be null");
-            }
+            
             _dbContext.Materials.Add(material);
             _dbContext.SaveChanges();
             //return CreatedAtAction(nameof(GetMaterialById), new { id = material.Id }, material);

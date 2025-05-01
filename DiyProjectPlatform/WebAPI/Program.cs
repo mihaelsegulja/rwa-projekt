@@ -62,7 +62,6 @@ builder.Services
             ValidateIssuer = false,
             ValidateAudience = false,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtTokenConfig.TokenSecret))
-
         };
     });
 
