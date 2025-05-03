@@ -43,9 +43,7 @@ public class TopicController : ControllerBase
         {
             var topic = _dbContext.Topics.Find(id);
             if (topic == null)
-            {
-                return NotFound();
-            }
+                return NotFound();         
             return Ok(topic);
         }
         catch (Exception e)
