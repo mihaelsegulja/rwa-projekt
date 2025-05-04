@@ -30,6 +30,7 @@ public class CommentController : ControllerBase
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
+            
             return Ok(comments);
         }
         catch (Exception e)
@@ -46,6 +47,7 @@ public class CommentController : ControllerBase
             comment.DateCreated = DateTime.UtcNow;
             _dbContext.Comments.Add(_mapper.Map<Comment>(comment));
             _dbContext.SaveChanges();
+            
             return Ok();
         }
         catch (Exception e)

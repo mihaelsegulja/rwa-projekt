@@ -2,6 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Dtos;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -21,7 +22,8 @@ public class ProjectController : ControllerBase
     }
 
     // TODO: Check project status, show projects with ProjectStatusType.Approved
-    // TODO: also maybe add another method to get pending projects (GetAllPendingProjects, or GetAllProjectsAndStatuses)
+    // TODO: also maybe add another method to get pending projects (GetAllPendingProjects, or GetAllProjectsAndAnyStatus)
+    // or add filter by StatusType
 
     [HttpGet("all")]
     public ActionResult<IEnumerable<Project>> GetAllProjects(int page = 1, int pageSize = 10)
@@ -32,6 +34,7 @@ public class ProjectController : ControllerBase
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
+            
             return Ok(projects);
         }
         catch (Exception e)
@@ -57,6 +60,27 @@ public class ProjectController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpPut("status")]
+    public ActionResult UpdateProjectStatus([FromBody] ProjectStatusDto projectStatus)
+    {
+        try
+        {
+            var projStatus = _dbContext.ProjectStatuses.FirstOrDefault(ps => ps.Id == projectStatus.Id);
+            if (projStatus == null)
+                return NotFound("Project not found");
+            
+            _dbContext.ProjectStatuses.Update(_mapper.Map<ProjectStatus>(projStatus));
+            _dbContext.SaveChanges();
+            
+            return Ok("Project status updated");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+    
     [HttpDelete("delete")]
     public ActionResult DeleteProject(int id)
     {

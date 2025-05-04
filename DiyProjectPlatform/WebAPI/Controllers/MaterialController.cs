@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Dtos;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -56,17 +57,20 @@ public class MaterialController : ControllerBase
     }
 
     [HttpPost("add")]
-    public IActionResult AddMaterial([FromBody] Material material)
+    public IActionResult AddMaterial([FromBody] MaterialDto material)
     {
         try
         {
-            if (material == null) 
-                return BadRequest("Material cannot be null");
+            var trimmedMaterial = material.Name.Trim();
             
-            _dbContext.Materials.Add(material);
+            if(_dbContext.Materials.Any(x => x.Name == trimmedMaterial))
+                return BadRequest($"Material {trimmedMaterial} already exists");
+            
+            material.Name = trimmedMaterial;
+            _dbContext.Materials.Add(_mapper.Map<Material>(material));
             _dbContext.SaveChanges();
-            //return CreatedAtAction(nameof(GetMaterialById), new { id = material.Id }, material);
-            return Ok();
+            
+            return Ok($"Material {trimmedMaterial} successfully added");
         }
         catch (Exception e)
         {

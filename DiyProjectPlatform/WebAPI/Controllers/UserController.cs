@@ -26,22 +26,19 @@ public class UserController : ControllerBase
     {
         try
         {
-            // Check if there is such a username in the database already
             var trimmedUsername = registerDto.Username.Trim();
             if (_dbContext.Users.Any(x => x.Username.Equals(trimmedUsername)))
                 return BadRequest($"Username {trimmedUsername} already exists");
 
-            // Hash the password
             var b64Salt = PasswordHashHelper.GetSalt();
             var b64Hash = PasswordHashHelper.GetHash(registerDto.Password, b64Salt);
 
-            // Create user from DTO and hashed password
             var user = _mapper.Map<User>(registerDto);
+            user.Username = trimmedUsername;
             user.PasswordHash = b64Hash;
             user.PasswordSalt = b64Salt;
             user.IsActive = true;
 
-            // Add user and save changes to database
             _dbContext.Add(user);
             _dbContext.SaveChanges();
 
@@ -60,48 +57,19 @@ public class UserController : ControllerBase
         {
             var genericLoginFail = "Incorrect username or password";
 
-            // Try to get a user from database
-            var existingUser = _dbContext.Users.FirstOrDefault(x => x.Username == loginDto.Username && x.IsActive);
+            var existingUser = _dbContext.Users.FirstOrDefault(x => x.IsActive && x.Username == loginDto.Username);
             if (existingUser == null)
                 return Unauthorized(genericLoginFail);
 
-            // Check if password hash matches
             var b64Hash = PasswordHashHelper.GetHash(loginDto.Password, existingUser.PasswordSalt);
             if (b64Hash != existingUser.PasswordHash)
                 return Unauthorized(genericLoginFail);
 
-            // Find user role
             var userRole = _dbContext.UserRoles.FirstOrDefault(ur => existingUser.UserRoleId == ur.Id);
 
             var serializedToken = JwtTokenHelper.CreateToken(loginDto.Username, existingUser.Id.ToString(), userRole.Name);
 
             return Ok(serializedToken);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
-    }
-
-    [Authorize]
-    [HttpDelete("delete")]
-    public ActionResult DeleteUser(int id)
-    {
-        try
-        {
-            var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            if (currentUserId == id)
-                return BadRequest("You cannot delete your own account");
-
-            var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
-            if (user == null)
-                return NotFound("User not found");
-
-            user.IsActive = false;
-            user.DateDeleted = DateTime.UtcNow;
-            _dbContext.SaveChanges();
-
-            return Ok("User has been deleted");
         }
         catch (Exception ex)
         {
@@ -120,6 +88,7 @@ public class UserController : ControllerBase
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
+            
             return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
         }
         catch (Exception ex)
@@ -128,6 +97,7 @@ public class UserController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpGet("{id}")]
     public ActionResult<UserDto> GetUserById(int id)
     {
@@ -136,6 +106,7 @@ public class UserController : ControllerBase
             var user = _dbContext.Users.FirstOrDefault(x => x.Id == id && x.IsActive);
             if (user == null)
                 return NotFound("User not found");
+            
             return Ok(_mapper.Map<UserDto>(user));
         }
         catch (Exception ex)
@@ -162,6 +133,33 @@ public class UserController : ControllerBase
             _dbContext.SaveChanges();
             
             return Ok("Profile picture updated");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+    
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("delete")]
+    public ActionResult DeleteUser(int id)
+    {
+        try
+        {
+            // Is this needed???
+            var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            if (currentUserId == id)
+                return BadRequest("You cannot delete your own account");
+
+            var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
+            if (user == null)
+                return NotFound("User not found");
+
+            user.IsActive = false;
+            user.DateDeleted = DateTime.UtcNow;
+            _dbContext.SaveChanges();
+
+            return Ok("User has been deleted");
         }
         catch (Exception ex)
         {

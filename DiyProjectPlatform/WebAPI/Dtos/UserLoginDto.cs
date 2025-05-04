@@ -8,6 +8,5 @@ public class UserLoginDto
     public string Username { get; set; }
 
     [Required(ErrorMessage = "Password is required")]
-    [StringLength(255, MinimumLength = 8, ErrorMessage = "Password should be at least 8 characters long")]
     public string Password { get; set; }
 }

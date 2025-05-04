@@ -22,5 +22,5 @@ public class UserRegisterDto
     [EmailAddress(ErrorMessage = "Provide a correct e-mail address")]
     public string Email { get; set; }
 
-    public string Phone { get; set; }
+    public string? Phone { get; set; }
 }

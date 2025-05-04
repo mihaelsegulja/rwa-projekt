@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Dtos;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -43,8 +44,31 @@ public class TopicController : ControllerBase
         {
             var topic = _dbContext.Topics.Find(id);
             if (topic == null)
-                return NotFound();         
+                return NotFound();
+            
             return Ok(topic);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpPost("add")]
+    public IActionResult AddTopic([FromBody] TopicDto topic)
+    {
+        try
+        {
+            var trimmedTopic = topic.Name.Trim();
+            
+            if (_dbContext.Topics.Any(t => t.Name == trimmedTopic))
+                return BadRequest($"Topic {trimmedTopic} already exists");
+            
+            topic.Name = trimmedTopic;
+            _dbContext.Topics.Add(_mapper.Map<Topic>(topic));
+            _dbContext.SaveChanges();
+            
+            return Ok($"Topic {trimmedTopic} successfully added");
         }
         catch (Exception e)
         {

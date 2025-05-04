@@ -3,7 +3,7 @@
 public class CommentDto
 {
     public DateTime DateCreated { get; set; }
-    public string Content { get; set; } = null!;
+    public string Content { get; set; }
     public int UserId { get; set; }
     public int ProjectId { get; set; }
     public int? ParentCommentId { get; set; }
