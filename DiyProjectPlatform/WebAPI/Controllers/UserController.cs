@@ -77,34 +77,6 @@ public class UserController : ControllerBase
         }
     }
 
-    [Authorize]
-    [HttpDelete("delete")]
-    public ActionResult DeleteUser(int id)
-    {
-        try
-        {
-            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-
-            if (currentUserId == id)
-                return BadRequest("You cannot delete your own account");
-
-            var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
-            if (user == null)
-                return NotFound("User not found");
-
-            user.IsActive = false;
-            user.DateDeleted = DateTime.UtcNow;
-
-            _dbContext.SaveChanges();
-
-            return Ok("User has been deleted");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
-    }
-
     [Authorize(Roles = "Admin")]
     [HttpGet("all")]
     public ActionResult<IEnumerable<UserDto>> GetAllUsers(int page = 1, int pageSize = 10)
@@ -176,7 +148,7 @@ public class UserController : ControllerBase
         try
         {
             // Is this needed???
-            var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
             if (currentUserId == id)
                 return BadRequest("You cannot delete your own account");
 

@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Dtos;
+using WebAPI.Helpers;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers;
@@ -90,7 +91,7 @@ public class ProjectController : ControllerBase
             if (projectStatus == null)
                 return NotFound("Project not found");
             
-            var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
             
             projectStatus.StatusTypeId = (int)Enums.ProjectStatusType.Deleted;
             projectStatus.DateModified = DateTime.Now;
