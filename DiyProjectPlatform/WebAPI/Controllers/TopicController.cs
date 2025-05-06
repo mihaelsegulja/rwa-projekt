@@ -29,6 +29,7 @@ public class TopicController : ControllerBase
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
+
             return Ok(topics);
         }
         catch (Exception e)

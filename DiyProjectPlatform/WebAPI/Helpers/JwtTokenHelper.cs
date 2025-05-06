@@ -6,7 +6,7 @@ using WebAPI.Config;
 
 namespace WebAPI.Helpers;
 
-public class JwtTokenHelper
+public static class JwtTokenHelper
 {
     public static string CreateToken(string name, string subject, string role)
     {

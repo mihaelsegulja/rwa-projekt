@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace WebAPI.Helpers;
 
-public class PasswordHashHelper
+public static class PasswordHashHelper
 {
     public static string GetSalt()
     {
