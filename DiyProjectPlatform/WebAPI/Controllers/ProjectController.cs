@@ -26,7 +26,7 @@ public class ProjectController : ControllerBase
     // or add filter by StatusType
 
     [HttpGet("all")]
-    public ActionResult<IEnumerable<Project>> GetAllProjects(int page = 1, int pageSize = 10)
+    public ActionResult<IEnumerable<ProjectDto>> GetAllProjects(int page = 1, int pageSize = 10)
     {
         try
         {
@@ -34,8 +34,8 @@ public class ProjectController : ControllerBase
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
-            
-            return Ok(projects);
+
+            return Ok(_mapper.Map<ProjectDto>(projects));
         }
         catch (Exception e)
         {
@@ -44,15 +44,15 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public ActionResult<Project> GetProjectById(int id)
+    public ActionResult<ProjectDto> GetProjectById(int id)
     {
         try
         {
             var project = _dbContext.Projects.FirstOrDefault(p => p.Id == id);
             if (project == null)
                 return NotFound("Project not found");
-            
-            return Ok(project);
+           
+            return Ok(_mapper.Map<ProjectDto>(project));
         }
         catch (Exception e)
         {

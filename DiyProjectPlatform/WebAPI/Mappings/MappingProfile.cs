@@ -14,6 +14,7 @@ public class MappingProfile : Profile
         CreateMap<Comment, CommentDto>().ReverseMap();
         CreateMap<Material, MaterialDto>().ReverseMap();
         CreateMap<Topic, TopicDto>().ReverseMap();
+        CreateMap<Project, ProjectDto>().ReverseMap();
         CreateMap<ProjectStatus, ProjectStatusDto>().ReverseMap();
     }
 }
