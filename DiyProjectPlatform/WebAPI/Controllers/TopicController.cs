@@ -76,4 +76,24 @@ public class TopicController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateTopic(int id, [FromBody] TopicDto topic)
+    {
+        try
+        {
+            var existingTopic = _dbContext.Topics.Find(id);
+            if (existingTopic == null)
+                return NotFound();
+
+            existingTopic.Name = topic.Name.Trim();
+            _dbContext.SaveChanges();
+
+            return Ok($"Topic {id} successfully updated");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
 }

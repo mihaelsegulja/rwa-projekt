@@ -21,7 +21,7 @@ public class CommentController : ControllerBase
     }
 
     [HttpGet("all/{projectId}")]
-    public ActionResult GetAllCommentsForProject(int projectId, int page = 1, int pageSize = 10)
+    public ActionResult<CommentDto> GetAllCommentsForProject(int projectId, int page = 1, int pageSize = 10)
     {
         try
         {
@@ -31,7 +31,7 @@ public class CommentController : ControllerBase
                 .Take(pageSize)
                 .ToList();
 
-            return Ok(comments);
+            return Ok(_mapper.Map<CommentDto>(comments));
         }
         catch (Exception e)
         {
@@ -40,7 +40,7 @@ public class CommentController : ControllerBase
     }
 
     [HttpPost("add")]
-    public ActionResult AddComment(CommentDto comment)
+    public IActionResult AddComment(CommentDto comment)
     {
         try
         {

@@ -77,4 +77,24 @@ public class MaterialController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateMaterial(int id, [FromBody] MaterialDto material)
+    {
+        try
+        {
+            var existingMaterial = _dbContext.Materials.Find(id);
+            if (existingMaterial == null)
+                return NotFound();
+
+            existingMaterial.Name = material.Name.Trim();
+            _dbContext.SaveChanges();
+
+            return Ok($"Material {id} successfully updated");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
 }

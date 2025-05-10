@@ -61,6 +61,53 @@ public class ProjectController : ControllerBase
         }
     }
 
+    [HttpPost("add")]
+    public ActionResult AddProject([FromBody] ProjectDto project)
+    {
+        try
+        {
+            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            project.DateCreated = DateTime.UtcNow;
+
+            var projectStatus = new ProjectStatus
+            {
+                ProjectId = project.Id,
+                StatusTypeId = (int)Enums.ProjectStatusType.Pending,
+                DateModified = DateTime.UtcNow
+            };
+
+            _dbContext.Projects.Add(_mapper.Map<Project>(project));
+            _dbContext.ProjectStatuses.Add(projectStatus);
+            _dbContext.SaveChanges();
+
+            return Ok("Project added successfully");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateProject(int id, [FromBody] ProjectDto project)
+    {
+        try
+        {
+            var existingProject = _dbContext.Projects.FirstOrDefault(p => p.Id == id);
+            if (existingProject == null)
+                return NotFound("Project not found");
+
+            _dbContext.Projects.Update(_mapper.Map<Project>(project));
+            _dbContext.SaveChanges();
+
+            return Ok("Project updated successfully");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+
     [Authorize(Roles = "Admin")]
     [HttpPut("status")]
     public ActionResult UpdateProjectStatus([FromBody] ProjectStatusDto projectStatus)
@@ -81,7 +128,7 @@ public class ProjectController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-    
+
     [HttpDelete("delete")]
     public ActionResult DeleteProject(int id)
     {
