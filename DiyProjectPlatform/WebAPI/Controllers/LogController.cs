@@ -21,11 +21,7 @@ public class LogController : ControllerBase
         _mapper = mapper;
     }
     
-    /// <summary>
-    /// Get last N logs
-    /// </summary>
-    /// <param name="n">Number of logs</param>
-    [HttpGet("get/{n}")]
+    [HttpGet("{n}")]
     public async Task<ActionResult<IEnumerable<LogDto>>> GetLastNLogs(int n)
     {
         try
@@ -42,10 +38,7 @@ public class LogController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-
-    /// <summary>
-    /// Get total log count
-    /// </summary>
+    
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetLogCount()
     {

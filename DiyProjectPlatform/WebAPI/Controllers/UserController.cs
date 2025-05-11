@@ -115,25 +115,28 @@ public class UserController : ControllerBase
         }
     }
 
-    // TODO: Add UpdateProfile where every user property can be updated, except password
-    // Password update will have to go in i.e. UpdatePassword
-    
     [Authorize]
-    [HttpPut("profilepicture")]
-    public ActionResult UpdateProfilePicture([FromBody] string profilePicture)
+    [HttpPut("update-profile")]
+    public ActionResult UpdateProfile(UserProfileDto profile)
     {
         try
         {
             var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
 
-            var user = _dbContext.Users.FirstOrDefault(x => x.Id == currentUserId);
-            if (user == null)
+            var existingUser = _dbContext.Users.FirstOrDefault(x => x.Id == currentUserId);
+            if (existingUser == null)
                 return NotFound("User not found");
-
-            user.ProfilePicture = profilePicture;
+            
+            existingUser.Username = profile.Username;
+            existingUser.FirstName = profile.FirstName;
+            existingUser.LastName = profile.LastName;
+            existingUser.Email = profile.Email;
+            existingUser.Phone = profile.Phone;
+            existingUser.ProfilePicture = profile.ProfilePicture;
+            
             _dbContext.SaveChanges();
 
-            return Ok("Profile picture updated");
+            return Ok("Profile updated");
         }
         catch (Exception ex)
         {

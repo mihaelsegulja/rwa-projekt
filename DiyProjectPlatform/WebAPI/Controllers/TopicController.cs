@@ -21,14 +21,11 @@ public class TopicController : ControllerBase
     }
 
     [HttpGet("all")]
-    public IActionResult GetAllTopics(int page = 1, int pageSize = 10)
+    public IActionResult GetAllTopics()
     {
         try
         {
-            var topics = _dbContext.Topics
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var topics = _dbContext.Topics.ToList();
 
             return Ok(topics);
         }
@@ -77,8 +74,8 @@ public class TopicController : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
-    public IActionResult UpdateTopic(int id, [FromBody] TopicDto topic)
+    [HttpPut("update")]
+    public IActionResult UpdateTopic(int id, TopicDto topic)
     {
         try
         {

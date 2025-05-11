@@ -19,19 +19,15 @@ public class MaterialController : ControllerBase
         _dbContext = dbContext;
         _mapper = mapper;
     }
-
-    // TODO: also add GetAllMaterials without pagination if needed
-
+    
     [HttpGet("all")]
-    public IActionResult GetAllMaterials(int page = 1, int pageSize = 10)
+    public IActionResult GetAllMaterials()
     {
         try
         {
-            var materials = _dbContext.Materials
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-            return Ok(materials);
+            var materials = _dbContext.Materials.ToList();
+            
+            return Ok(_mapper.Map<IEnumerable<MaterialDto>>(materials));
         }
         catch (Exception e)
         {
@@ -48,7 +44,7 @@ public class MaterialController : ControllerBase
             if (material == null) 
                 return NotFound();
             
-            return Ok(material);
+            return Ok(_mapper.Map<MaterialDto>(material));
         }
         catch (Exception e)
         {
@@ -78,8 +74,8 @@ public class MaterialController : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
-    public IActionResult UpdateMaterial(int id, [FromBody] MaterialDto material)
+    [HttpPut("update")]
+    public IActionResult UpdateMaterial(int id, MaterialDto material)
     {
         try
         {

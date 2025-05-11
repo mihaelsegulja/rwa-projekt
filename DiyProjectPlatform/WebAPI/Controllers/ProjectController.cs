@@ -22,21 +22,24 @@ public class ProjectController : ControllerBase
         _mapper = mapper;
     }
 
-    // TODO: Check project status, show projects with ProjectStatusType.Approved
-    // TODO: also maybe add another method to get pending projects (GetAllPendingProjects, or GetAllProjectsAndAnyStatus)
-    // or add filter by StatusType
-
     [HttpGet("all")]
     public ActionResult<IEnumerable<ProjectDto>> GetAllProjects(int page = 1, int pageSize = 10)
     {
         try
         {
+            var userRole = ClaimsHelper.GetClaimValue(User, ClaimTypes.Role);
+            
             var projects = _dbContext.Projects
+                .Where(p => p.ProjectStatuses.Any(ps => 
+                    userRole == "Admin" ? 
+                        ps.StatusTypeId != (int)Enums.ProjectStatusType.Deleted : 
+                        ps.StatusTypeId == (int)Enums.ProjectStatusType.Approved
+                        ))
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
-            return Ok(_mapper.Map<ProjectDto>(projects));
+            return Ok(_mapper.Map<IEnumerable<ProjectDto>>(projects));
         }
         catch (Exception e)
         {
@@ -66,7 +69,6 @@ public class ProjectController : ControllerBase
     {
         try
         {
-            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
             project.DateCreated = DateTime.UtcNow;
 
             var projectStatus = new ProjectStatus
@@ -80,7 +82,7 @@ public class ProjectController : ControllerBase
             _dbContext.ProjectStatuses.Add(projectStatus);
             _dbContext.SaveChanges();
 
-            return Ok("Project added successfully");
+            return Ok("Project added");
         }
         catch (Exception e)
         {
@@ -88,8 +90,8 @@ public class ProjectController : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
-    public IActionResult UpdateProject(int id, [FromBody] ProjectDto project)
+    [HttpPut("update")]
+    public IActionResult UpdateProject(int id, ProjectDto project)
     {
         try
         {
@@ -100,7 +102,7 @@ public class ProjectController : ControllerBase
             _dbContext.Projects.Update(_mapper.Map<Project>(project));
             _dbContext.SaveChanges();
 
-            return Ok("Project updated successfully");
+            return Ok("Project updated");
         }
         catch (Exception e)
         {
@@ -109,16 +111,16 @@ public class ProjectController : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
-    [HttpPut("status")]
-    public ActionResult UpdateProjectStatus([FromBody] ProjectStatusDto projectStatus)
+    [HttpPut("update-status")]
+    public ActionResult UpdateProjectStatus(int id, ProjectStatusDto projectStatus)
     {
         try
         {
-            var projStatus = _dbContext.ProjectStatuses.FirstOrDefault(ps => ps.Id == projectStatus.Id);
+            var projStatus = _dbContext.ProjectStatuses.FirstOrDefault(ps => ps.Id == id);
             if (projStatus == null)
                 return NotFound("Project not found");
             
-            _dbContext.ProjectStatuses.Update(_mapper.Map<ProjectStatus>(projStatus));
+            _dbContext.ProjectStatuses.Update(_mapper.Map<ProjectStatus>(projectStatus));
             _dbContext.SaveChanges();
             
             return Ok("Project status updated");
@@ -145,7 +147,7 @@ public class ProjectController : ControllerBase
             projectStatus.ApproverId = currentUserId;
             _dbContext.SaveChanges();
             
-            return Ok("Project has been deleted");
+            return Ok("Project deleted");
         }
         catch (Exception e)
         {

@@ -55,4 +55,44 @@ public class CommentController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpPut("update")]
+    public IActionResult UpdateComment(int id, CommentDto comment)
+    {
+        try
+        {
+           var existingComment = _dbContext.Comments.FirstOrDefault(c => c.Id == id);
+           if (existingComment == null)
+               return NotFound("Comment not found");
+           
+           _dbContext.Comments.Update(_mapper.Map<Comment>(comment));
+           _dbContext.SaveChanges();
+           
+           return Ok("Comment updated");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpDelete("delete")]
+    public IActionResult DeleteComment(int id)
+    {
+        try
+        {
+            var existingComment = _dbContext.Comments.FirstOrDefault(c => c.Id == id);
+            if (existingComment == null)
+                return NotFound("Comment not found");
+
+            existingComment.Content = "deleted";
+            _dbContext.SaveChanges();
+            
+            return Ok("Comment deleted");
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
 }
