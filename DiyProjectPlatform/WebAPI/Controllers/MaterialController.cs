@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebAPI.Dtos;
 using WebAPI.Models;
 
@@ -21,11 +22,11 @@ public class MaterialController : ControllerBase
     }
     
     [HttpGet("all")]
-    public IActionResult GetAllMaterials()
+    public async Task<ActionResult<IEnumerable<MaterialDto>>> GetAllMaterials()
     {
         try
         {
-            var materials = _dbContext.Materials.ToList();
+            var materials = await _dbContext.Materials.ToListAsync();
             
             return Ok(_mapper.Map<IEnumerable<MaterialDto>>(materials));
         }
@@ -36,11 +37,11 @@ public class MaterialController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetMaterialById(int id)
+    public async Task<ActionResult<MaterialDto>> GetMaterialById(int id)
     {
         try
         {
-            var material = _dbContext.Materials.Find(id);
+            var material = await _dbContext.Materials.FindAsync(id);
             if (material == null) 
                 return NotFound();
             
@@ -53,18 +54,22 @@ public class MaterialController : ControllerBase
     }
 
     [HttpPost("add")]
-    public IActionResult AddMaterial([FromBody] MaterialDto material)
+    public async Task<IActionResult> AddMaterial(string material)
     {
         try
         {
-            var trimmedMaterial = material.Name.Trim();
+            var trimmedMaterial = material.Trim();
             
-            if(_dbContext.Materials.Any(x => x.Name == trimmedMaterial))
+            if(await _dbContext.Materials.AnyAsync(x => x.Name == trimmedMaterial))
                 return BadRequest($"Material {trimmedMaterial} already exists");
             
-            material.Name = trimmedMaterial;
-            _dbContext.Materials.Add(_mapper.Map<Material>(material));
-            _dbContext.SaveChanges();
+            var newMaterial = new Material
+            {
+                Name = trimmedMaterial,
+            };
+
+            await _dbContext.Materials.AddAsync(_mapper.Map<Material>(newMaterial));
+            await _dbContext.SaveChangesAsync();
             
             return Ok($"Material {trimmedMaterial} successfully added");
         }
@@ -75,18 +80,18 @@ public class MaterialController : ControllerBase
     }
 
     [HttpPut("update")]
-    public IActionResult UpdateMaterial(int id, MaterialDto material)
+    public async Task<IActionResult> UpdateMaterial(MaterialDto material)
     {
         try
         {
-            var existingMaterial = _dbContext.Materials.Find(id);
+            var existingMaterial = await _dbContext.Materials.FindAsync(material.Id);
             if (existingMaterial == null)
                 return NotFound();
 
             existingMaterial.Name = material.Name.Trim();
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
-            return Ok($"Material {id} successfully updated");
+            return Ok($"Material {material.Id} successfully updated");
         }
         catch (Exception e)
         {

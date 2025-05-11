@@ -9,7 +9,7 @@ namespace WebAPI.Controllers;
 
 [Route("api/log")]
 [ApiController]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = nameof(Enums.UserRole.Admin))]
 public class LogController : ControllerBase
 {
     private readonly DbDiyProjectPlatformContext _dbContext;

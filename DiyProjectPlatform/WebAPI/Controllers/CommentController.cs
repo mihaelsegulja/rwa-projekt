@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebAPI.Dtos;
 using WebAPI.Models;
 
@@ -21,17 +22,17 @@ public class CommentController : ControllerBase
     }
 
     [HttpGet("all/{projectId}")]
-    public ActionResult<CommentDto> GetAllCommentsForProject(int projectId, int page = 1, int pageSize = 10)
+    public async Task<ActionResult<IEnumerable<CommentDto>>> GetAllCommentsForProject(int projectId, int page = 1, int pageSize = 10)
     {
         try
         {
-            var comments = _dbContext.Comments
+            var comments = await _dbContext.Comments
                 .Where(c => c.ProjectId == projectId)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .ToListAsync();
 
-            return Ok(_mapper.Map<CommentDto>(comments));
+            return Ok(_mapper.Map<IEnumerable<CommentDto>>(comments));
         }
         catch (Exception e)
         {
@@ -40,13 +41,13 @@ public class CommentController : ControllerBase
     }
 
     [HttpPost("add")]
-    public IActionResult AddComment(CommentDto comment)
+    public async Task<IActionResult> AddComment(CommentDto comment)
     {
         try
         {
             comment.DateCreated = DateTime.UtcNow;
-            _dbContext.Comments.Add(_mapper.Map<Comment>(comment));
-            _dbContext.SaveChanges();
+            await _dbContext.Comments.AddAsync(_mapper.Map<Comment>(comment));
+            await _dbContext.SaveChangesAsync();
             
             return Ok();
         }
@@ -57,16 +58,16 @@ public class CommentController : ControllerBase
     }
 
     [HttpPut("update")]
-    public IActionResult UpdateComment(int id, CommentDto comment)
+    public async Task<IActionResult> UpdateComment(CommentDto comment)
     {
         try
         {
-           var existingComment = _dbContext.Comments.FirstOrDefault(c => c.Id == id);
+           var existingComment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == comment.Id);
            if (existingComment == null)
                return NotFound("Comment not found");
            
-           _dbContext.Comments.Update(_mapper.Map<Comment>(comment));
-           _dbContext.SaveChanges();
+           _mapper.Map(comment, existingComment);
+           await _dbContext.SaveChangesAsync();
            
            return Ok("Comment updated");
         }
@@ -77,16 +78,16 @@ public class CommentController : ControllerBase
     }
 
     [HttpDelete("delete")]
-    public IActionResult DeleteComment(int id)
+    public async Task<IActionResult> DeleteComment(int id)
     {
         try
         {
-            var existingComment = _dbContext.Comments.FirstOrDefault(c => c.Id == id);
+            var existingComment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
             if (existingComment == null)
                 return NotFound("Comment not found");
 
             existingComment.Content = "deleted";
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
             
             return Ok("Comment deleted");
         }

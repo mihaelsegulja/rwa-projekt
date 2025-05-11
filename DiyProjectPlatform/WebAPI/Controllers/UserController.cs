@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using WebAPI.Dtos;
 using WebAPI.Helpers;
@@ -22,12 +23,12 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("register")]
-    public ActionResult Register(UserRegisterDto registerDto)
+    public async Task<IActionResult> Register(UserRegisterDto registerDto)
     {
         try
         {
             var trimmedUsername = registerDto.Username.Trim();
-            if (_dbContext.Users.Any(x => x.Username.Equals(trimmedUsername)))
+            if (await _dbContext.Users.AnyAsync(x => x.Username.Equals(trimmedUsername)))
                 return BadRequest($"Username {trimmedUsername} already exists");
 
             var b64Salt = PasswordHashHelper.GetSalt();
@@ -39,8 +40,8 @@ public class UserController : ControllerBase
             user.PasswordSalt = b64Salt;
             user.IsActive = true;
 
-            _dbContext.Add(user);
-            _dbContext.SaveChanges();
+            await _dbContext.AddAsync(user);
+            await _dbContext.SaveChangesAsync();
 
             return Ok("Success");
         }
@@ -51,13 +52,13 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("login")]
-    public ActionResult Login(UserLoginDto loginDto)
+    public async Task<IActionResult> Login(UserLoginDto loginDto)
     {
         try
         {
             var genericLoginFail = "Incorrect username or password";
 
-            var existingUser = _dbContext.Users.FirstOrDefault(x => x.IsActive && x.Username == loginDto.Username);
+            var existingUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.IsActive && x.Username == loginDto.Username);
             if (existingUser == null)
                 return Unauthorized(genericLoginFail);
 
@@ -65,7 +66,7 @@ public class UserController : ControllerBase
             if (b64Hash != existingUser.PasswordHash)
                 return Unauthorized(genericLoginFail);
 
-            var userRole = _dbContext.UserRoles.FirstOrDefault(ur => existingUser.UserRoleId == ur.Id);
+            var userRole = await _dbContext.UserRoles.FirstOrDefaultAsync(ur => existingUser.UserRoleId == ur.Id);
 
             var serializedToken = JwtTokenHelper.CreateToken(loginDto.Username, existingUser.Id.ToString(), userRole.Name);
 
@@ -77,17 +78,17 @@ public class UserController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = nameof(Enums.UserRole.Admin))]
     [HttpGet("all")]
-    public ActionResult<IEnumerable<UserDto>> GetAllUsers(int page = 1, int pageSize = 10)
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers(int page = 1, int pageSize = 10)
     {
         try
         {
-            var users = _dbContext.Users
+            var users = await _dbContext.Users
                 .Where(u => u.IsActive)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToList();
+                .ToListAsync();
 
             return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
         }
@@ -99,11 +100,11 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpGet("{id}")]
-    public ActionResult<UserDto> GetUserById(int id)
+    public async Task<ActionResult<UserDto>> GetUserById(int id)
     {
         try
         {
-            var user = _dbContext.Users.FirstOrDefault(x => x.Id == id && x.IsActive);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id && x.IsActive);
             if (user == null)
                 return NotFound("User not found");
             
@@ -117,13 +118,13 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpPut("update-profile")]
-    public ActionResult UpdateProfile(UserProfileDto profile)
+    public async Task<IActionResult> UpdateProfile(UserProfileDto profile)
     {
         try
         {
             var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
 
-            var existingUser = _dbContext.Users.FirstOrDefault(x => x.Id == currentUserId);
+            var existingUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == currentUserId);
             if (existingUser == null)
                 return NotFound("User not found");
             
@@ -134,7 +135,7 @@ public class UserController : ControllerBase
             existingUser.Phone = profile.Phone;
             existingUser.ProfilePicture = profile.ProfilePicture;
             
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return Ok("Profile updated");
         }
@@ -144,9 +145,9 @@ public class UserController : ControllerBase
         }
     }
     
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = nameof(Enums.UserRole.Admin))]
     [HttpDelete("delete")]
-    public ActionResult DeleteUser(int id)
+    public async Task<IActionResult> DeleteUser(int id)
     {
         try
         {
@@ -155,13 +156,13 @@ public class UserController : ControllerBase
             if (currentUserId == id)
                 return BadRequest("You cannot delete your own account");
 
-            var user = _dbContext.Users.FirstOrDefault(x => x.Id == id);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
                 return NotFound("User not found");
 
             user.IsActive = false;
             user.DateDeleted = DateTime.UtcNow;
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return Ok("User has been deleted");
         }
