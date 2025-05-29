@@ -1,11 +1,13 @@
-using System.Text;
+using Shared.Config;
+using Core.Context;
+using Core.Interfaces;
+using Core.Mappings;
+using Core.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using WebAPI.Config;
-using WebAPI.Mappings;
-using WebAPI.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,7 +67,16 @@ builder.Services
         };
     });
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddScoped<IMaterialService, MaterialService>();
+builder.Services.AddScoped<ITopicService, TopicService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ILogService, LogService>();
+
+builder.Services.AddAutoMapper(
+    typeof(CoreMappingProfile)
+);
 
 var app = builder.Build();
 

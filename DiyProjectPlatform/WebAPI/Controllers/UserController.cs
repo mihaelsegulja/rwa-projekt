@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using WebAPI.Dtos;
-using WebAPI.Helpers;
-using WebAPI.Models;
+using Core.Dtos;
+using Shared.Helpers;
+using Core.Interfaces;
 
 namespace WebAPI.Controllers;
 
@@ -13,12 +12,12 @@ namespace WebAPI.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly DbDiyProjectPlatformContext _dbContext;
+    private readonly IUserService _userService;
     private readonly IMapper _mapper;
 
-    public UserController(DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public UserController(IUserService userService, IMapper mapper)
     {
-        _dbContext = dbContext;
+        _userService = userService;
         _mapper = mapper;
     }
 
@@ -27,23 +26,12 @@ public class UserController : ControllerBase
     {
         try
         {
-            var trimmedUsername = registerDto.Username.Trim();
-            if (await _dbContext.Users.AnyAsync(x => x.Username.Equals(trimmedUsername)))
-                return BadRequest($"Username {trimmedUsername} already exists");
-
-            var b64Salt = PasswordHashHelper.GetSalt();
-            var b64Hash = PasswordHashHelper.GetHash(registerDto.Password, b64Salt);
-
-            var user = _mapper.Map<User>(registerDto);
-            user.Username = trimmedUsername;
-            user.PasswordHash = b64Hash;
-            user.PasswordSalt = b64Salt;
-            user.IsActive = true;
-
-            await _dbContext.AddAsync(user);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok("Success");
+            var result = await _userService.UserRegisterAsync(registerDto);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
@@ -56,21 +44,8 @@ public class UserController : ControllerBase
     {
         try
         {
-            var genericLoginFail = "Incorrect username or password";
-
-            var existingUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.IsActive && x.Username == loginDto.Username);
-            if (existingUser == null)
-                return Unauthorized(genericLoginFail);
-
-            var b64Hash = PasswordHashHelper.GetHash(loginDto.Password, existingUser.PasswordSalt);
-            if (b64Hash != existingUser.PasswordHash)
-                return Unauthorized(genericLoginFail);
-
-            var userRole = await _dbContext.UserRoles.FirstOrDefaultAsync(ur => existingUser.UserRoleId == ur.Id);
-
-            var serializedToken = JwtTokenHelper.CreateToken(loginDto.Username, existingUser.Id.ToString(), userRole.Name);
-
-            return Ok(serializedToken);
+            var token = await _userService.UserLoginAsync(loginDto);
+            return token == null ? Unauthorized("Incorrect username or password") : Ok(token);
         }
         catch (Exception ex)
         {
@@ -78,19 +53,14 @@ public class UserController : ControllerBase
         }
     }
 
-    [Authorize(Roles = nameof(Enums.UserRole.Admin))]
+    [Authorize(Roles = nameof(Core.Enums.UserRole.Admin))]
     [HttpGet("all")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> GetAllUsers(int page = 1, int pageSize = 10)
     {
         try
         {
-            var users = await _dbContext.Users
-                .Where(u => u.IsActive)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return Ok(_mapper.Map<IEnumerable<UserDto>>(users));
+            var users = await _userService.GetAllUsersAsync(page, pageSize);
+            return Ok(users);
         }
         catch (Exception ex)
         {
@@ -100,15 +70,12 @@ public class UserController : ControllerBase
 
     [Authorize]
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserDto>> GetUserById(int id)
+    public async Task<IActionResult> GetUserById(int id)
     {
         try
         {
-            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id && x.IsActive);
-            if (user == null)
-                return NotFound("User not found");
-            
-            return Ok(_mapper.Map<UserDto>(user));
+            var user = await _userService.GetUserByIdAsync(id);
+            return user == null ? NotFound("User not found") : Ok(user);
         }
         catch (Exception ex)
         {
@@ -122,22 +89,9 @@ public class UserController : ControllerBase
     {
         try
         {
-            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-
-            var existingUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == currentUserId);
-            if (existingUser == null)
-                return NotFound("User not found");
-            
-            existingUser.Username = profile.Username;
-            existingUser.FirstName = profile.FirstName;
-            existingUser.LastName = profile.LastName;
-            existingUser.Email = profile.Email;
-            existingUser.Phone = profile.Phone;
-            existingUser.ProfilePicture = profile.ProfilePicture;
-            
-            await _dbContext.SaveChangesAsync();
-
-            return Ok("Profile updated");
+            var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            var result = await _userService.UpdateUserProfileAsync(userId, profile);
+            return result == null ? NotFound("User not found") : Ok(result);
         }
         catch (Exception ex)
         {
@@ -145,26 +99,15 @@ public class UserController : ControllerBase
         }
     }
     
-    [Authorize(Roles = nameof(Enums.UserRole.Admin))]
+    [Authorize(Roles = nameof(Core.Enums.UserRole.Admin))]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteUser(int id)
     {
         try
         {
-            // Is this needed???
-            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-            if (currentUserId == id)
-                return BadRequest("You cannot delete your own account");
-
-            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
-            if (user == null)
-                return NotFound("User not found");
-
-            user.IsActive = false;
-            user.DateDeleted = DateTime.UtcNow;
-            await _dbContext.SaveChangesAsync();
-
-            return Ok("User has been deleted");
+            var adminId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            var result = await _userService.DeleteUserAsync(adminId, id);
+            return result == null ? NotFound("User not found") : Ok(result);
         }
         catch (Exception ex)
         {

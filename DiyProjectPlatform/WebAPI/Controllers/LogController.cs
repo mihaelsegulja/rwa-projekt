@@ -1,37 +1,31 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebAPI.Dtos;
-using WebAPI.Models;
+using Core.Interfaces;
 
 namespace WebAPI.Controllers;
 
 [Route("api/log")]
 [ApiController]
-[Authorize(Roles = nameof(Enums.UserRole.Admin))]
+[Authorize(Roles = nameof(Core.Enums.UserRole.Admin))]
 public class LogController : ControllerBase
 {
-    private readonly DbDiyProjectPlatformContext _dbContext;
+    private readonly ILogService _logService;
     private readonly IMapper _mapper;
     
-    public LogController(DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public LogController(ILogService logService, IMapper mapper)
     {
-        _dbContext = dbContext;
+        _logService = logService;
         _mapper = mapper;
     }
     
     [HttpGet("{n}")]
-    public async Task<ActionResult<IEnumerable<LogDto>>> GetLastNLogs(int n)
+    public async Task<IActionResult> GetLastNLogs(int n)
     {
         try
         {
-            var logs = await _dbContext.Logs
-                .OrderByDescending(l => l.Timestamp)
-                .Take(n)
-                .ToListAsync();
-
-            return Ok(_mapper.Map<IEnumerable<LogDto>>(logs));
+            var logs = await _logService.GetLastNLogsAsync(n);
+            return Ok(logs);
         }
         catch (Exception e)
         {
@@ -40,12 +34,11 @@ public class LogController : ControllerBase
     }
     
     [HttpGet("count")]
-    public async Task<ActionResult<int>> GetLogCount()
+    public async Task<IActionResult> GetLogCount()
     {
         try
         {
-            var result = await _dbContext.Logs.CountAsync();
-            
+            var result = await _logService.GetLogCountAsync();
             return Ok(result);
         }
         catch (Exception e)

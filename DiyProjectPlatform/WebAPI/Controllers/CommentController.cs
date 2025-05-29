@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Core.Dtos;
+using Core.Interfaces;
+using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAPI.Dtos;
-using WebAPI.Models;
+using Shared.Helpers;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers;
 
@@ -12,27 +15,22 @@ namespace WebAPI.Controllers;
 [Authorize]
 public class CommentController : ControllerBase
 {
-    private readonly DbDiyProjectPlatformContext _dbContext;
+    private readonly ICommentService _commentService;
     private readonly IMapper _mapper;
 
-    public CommentController(DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public CommentController(ICommentService commentService, IMapper mapper)
     {
-        _dbContext = dbContext;
+        _commentService = commentService;
         _mapper = mapper;
     }
 
     [HttpGet("all/{projectId}")]
-    public async Task<ActionResult<IEnumerable<CommentDto>>> GetAllCommentsForProject(int projectId, int page = 1, int pageSize = 10)
+    public async Task<IActionResult> GetAllCommentsForProject(int projectId, int page = 1, int pageSize = 10)
     {
         try
         {
-            var comments = await _dbContext.Comments
-                .Where(c => c.ProjectId == projectId)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            return Ok(_mapper.Map<IEnumerable<CommentDto>>(comments));
+            var comments = await _commentService.GetAllCommentsByProjectIdAsync(projectId, page, pageSize);
+            return Ok(comments);
         }
         catch (Exception e)
         {
@@ -45,10 +43,7 @@ public class CommentController : ControllerBase
     {
         try
         {
-            comment.DateCreated = DateTime.UtcNow;
-            await _dbContext.Comments.AddAsync(_mapper.Map<Comment>(comment));
-            await _dbContext.SaveChangesAsync();
-            
+            await _commentService.AddCommentAsync(comment);
             return Ok();
         }
         catch (Exception e)
@@ -62,14 +57,9 @@ public class CommentController : ControllerBase
     {
         try
         {
-           var existingComment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == comment.Id);
-           if (existingComment == null)
-               return NotFound("Comment not found");
-           
-           _mapper.Map(comment, existingComment);
-           await _dbContext.SaveChangesAsync();
-           
-           return Ok("Comment updated");
+            int currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            var result = await _commentService.UpdateCommentAsync(comment, currentUserId);
+            return Ok(result);
         }
         catch (Exception e)
         {
@@ -82,14 +72,8 @@ public class CommentController : ControllerBase
     {
         try
         {
-            var existingComment = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
-            if (existingComment == null)
-                return NotFound("Comment not found");
-
-            existingComment.Content = "deleted";
-            await _dbContext.SaveChangesAsync();
-            
-            return Ok("Comment deleted");
+            var result = await _commentService.DeleteCommentAsync(id);
+            return Ok(result);
         }
         catch (Exception e)
         {
