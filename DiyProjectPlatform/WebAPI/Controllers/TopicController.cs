@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebAPI.Dtos;
-using WebAPI.Models;
+using Core.Dtos;
+using Core.Interfaces;
 
 namespace WebAPI.Controllers;
 
@@ -12,23 +11,22 @@ namespace WebAPI.Controllers;
 [Authorize]
 public class TopicController : ControllerBase
 {
-    private readonly DbDiyProjectPlatformContext _dbContext;
+    private readonly ITopicService _topicService;
     private readonly IMapper _mapper;
 
-    public TopicController(DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public TopicController(ITopicService topicService, IMapper mapper)
     {
-        _dbContext = dbContext;
+        _topicService = topicService;
         _mapper = mapper;
     }
 
     [HttpGet("all")]
-    public async Task<ActionResult<IEnumerable<TopicDto>>> GetAllTopics()
+    public async Task<IActionResult> GetAllTopics()
     {
         try
         {
-            var topics = await _dbContext.Topics.ToListAsync();
-
-            return Ok(_mapper.Map<IEnumerable<TopicDto>>(topics));
+            var topics = await _topicService.GetAllTopicsAsync();
+            return Ok(topics);
         }
         catch (Exception e)
         {
@@ -37,15 +35,12 @@ public class TopicController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TopicDto>> GetTopicById(int id)
+    public async Task<IActionResult> GetTopicById(int id)
     {
         try
         {
-            var topic = await _dbContext.Topics.FindAsync(id);
-            if (topic == null)
-                return NotFound();
-            
-            return Ok(_mapper.Map<TopicDto>(topic));
+            var topic = await _topicService.GetTopicByIdAsync(id);
+            return topic == null ? NotFound() : Ok(topic);
         }
         catch (Exception e)
         {
@@ -58,20 +53,12 @@ public class TopicController : ControllerBase
     {
         try
         {
-            var trimmedTopic = topic.Trim();
-            
-            if (await _dbContext.Topics.AnyAsync(t => t.Name == trimmedTopic))
-                return BadRequest($"Topic {trimmedTopic} already exists");
-            
-            var newTopic = new Topic
-            {
-                Name = trimmedTopic,
-            };
-
-            await _dbContext.Topics.AddAsync(_mapper.Map<Topic>(newTopic));
-            await _dbContext.SaveChangesAsync();
-            
-            return Ok($"Topic {trimmedTopic} successfully added");
+            var result = await _topicService.AddTopicAsync(topic);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
         }
         catch (Exception e)
         {
@@ -84,14 +71,8 @@ public class TopicController : ControllerBase
     {
         try
         {
-            var existingTopic = await _dbContext.Topics.FindAsync(topic.Id);
-            if (existingTopic == null)
-                return NotFound();
-
-            existingTopic.Name = topic.Name.Trim();
-            await _dbContext.SaveChangesAsync();
-
-            return Ok($"Topic {topic.Id} successfully updated");
+            var result = await _topicService.UpdateTopicAsync(topic);
+            return result == null ? NotFound() : Ok(result);
         }
         catch (Exception e)
         {
