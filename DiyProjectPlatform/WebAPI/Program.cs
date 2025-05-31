@@ -46,6 +46,7 @@ builder.Services.AddSwaggerGen(option =>
             }
         });
 });
+
 builder.Services.AddDbContext<DbDiyProjectPlatformContext>(options => {
     options.UseSqlServer("name=ConnectionStrings:DefaultConnection");
 });
@@ -86,6 +87,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

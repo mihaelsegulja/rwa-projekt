@@ -114,4 +114,20 @@ public class UserController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
+
+    [Authorize]
+    [HttpPut("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+    {
+        try
+        {
+            var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            var result = await _userService.ChangeUserPasswordAsync(userId, changePasswordDto);
+            return result == null ? NotFound("User not found") : Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
 }

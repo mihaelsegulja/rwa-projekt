@@ -22,9 +22,22 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @if(User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <div class="badge bg-primary">Hello, @User.Identity.Name</div>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Logout">Logout</a>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   href="http://localhost:5069/login.html">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   href="http://localhost:5069/register.html">Register</a>
+                            </li> 
+                        }
                     </ul>
                 </div>
             </div>
@@ -38,7 +51,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - WebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - DIY Project Platform - <a href="https://github.com/mihaelsegulja">mihaelsegulja</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

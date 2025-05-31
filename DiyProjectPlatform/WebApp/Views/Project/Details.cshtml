@@ -1,0 +1,31 @@
+﻿@model Core.Dtos.ProjectDetailDto
+@{
+    ViewData["Title"] = Model.Project.Title;
+}
+
+<h2>@Model.Project.Title</h2>
+
+<p><strong>Author:</strong> @Model.Project.UserId</p>
+<p><strong>Topic:</strong> @Model.Project.TopicId</p>
+<p><strong>Description:</strong> @Model.Project.Description</p>
+<p><strong>Content:</strong></p>
+<p>@Model.Project.Content</p>
+
+<h4>Materials Used</h4>
+<ul>
+    @foreach (var id in Model.MaterialIds)
+    {
+        <li>Material ID: @id</li> @* You can map ID to name if needed *@
+    }
+</ul>
+
+<h4>Images</h4>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    @foreach (var img in Model.Images)
+    {
+        <div class="col">
+            <img src="data:image/png;base64,@img.ImageData" class="img-fluid rounded shadow-sm" />
+            <p>@img.Description</p>
+        </div>
+    }
+</div>

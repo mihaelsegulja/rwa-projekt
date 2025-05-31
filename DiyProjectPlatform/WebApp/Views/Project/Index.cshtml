@@ -1,0 +1,26 @@
+﻿@model IEnumerable<Core.Dtos.ProjectListDto>
+@{
+    ViewData["Title"] = "Projects";
+}
+
+<h2 class="mb-4">Projects</h2>
+
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    @foreach (var project in Model)
+    {
+        <div class="col">
+            <div class="card shadow-sm">
+                @if (!string.IsNullOrEmpty(project.MainImage))
+                {
+                    <img src="data:image/png;base64,@project.MainImage" class="card-img-top" alt="Main Image">
+                }
+                <div class="card-body">
+                    <h5 class="card-title">@project.Title</h5>
+                    <p class="card-text">@project.Description</p>
+                    <p class="text-muted">By @project.Username, Topic: @project.TopicName</p>
+                    <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">View</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -101,4 +101,21 @@ public class UserService : IUserService
         await _dbContext.SaveChangesAsync();
         return "User has been deleted";
     }
+
+    public async Task<string?> ChangeUserPasswordAsync(int userId, ChangePasswordDto changePasswordDto)
+    {
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return null;
+
+        var currentHash = PasswordHashHelper.GetHash(changePasswordDto.CurrentPassword, user.PasswordSalt);
+        if (currentHash != user.PasswordHash)
+            throw new InvalidOperationException("Current password is incorrect");
+
+        var newSalt = PasswordHashHelper.GetSalt();
+        var newHash = PasswordHashHelper.GetHash(changePasswordDto.NewPassword, newSalt);
+        user.PasswordHash = newHash;
+        user.PasswordSalt = newSalt;
+        await _dbContext.SaveChangesAsync();
+        return "Password changed successfully";
+    }
 }
