@@ -84,14 +84,28 @@ public class ProjectService : IProjectService
         return dto;
     }
 
-    public async Task<IEnumerable<ProjectStatusDto>> GetAllProjectStatusesAsync(int page, int pageSize)
+    public async Task<IEnumerable<ProjectStatusListDto>> GetAllProjectStatusesAsync(int page, int pageSize)
     {
         var statuses = await _dbContext.ProjectStatuses
+            .Include(s => s.Project)
+                .ThenInclude(p => p.User)
+            .Include(s => s.Approver)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        return _mapper.Map<IEnumerable<ProjectStatusDto>>(statuses);
+        var result = statuses.Select(s => new ProjectStatusListDto
+        {
+            Id = s.Id,
+            ProjectId = s.ProjectId,
+            ProjectTitle = s.Project.Title,
+            StatusTypeId = s.StatusTypeId,
+            ApproverUsername = s.Approver != null ? s.Approver.Username : string.Empty,
+            AuthorUsername = s.Project.User.Username,
+            DateModified = s.DateModified
+        });
+
+        return result;
     }
 
     public async Task<string> AddProjectAsync(ProjectCreateDto projectCreateDto, int currentUserId)

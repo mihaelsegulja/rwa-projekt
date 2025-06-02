@@ -58,6 +58,8 @@
 
             if (response.ok) {
                 const token = await response.text();
+                localStorage.removeItem("jwt");
+                localStorage.setItem("jwt", token);
 
                 const returnParam = new URLSearchParams(window.location.search).get("returnUrl");
                 const returnUrl = returnParam && decodeURIComponent(returnParam);

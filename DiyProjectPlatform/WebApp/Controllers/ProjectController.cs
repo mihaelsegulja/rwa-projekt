@@ -39,11 +39,12 @@ public class ProjectController : Controller
 
     public async Task<IActionResult> Details(int id)
     {
-        var project = await _projectService.GetProjectByIdAsync(id);
-        if (project == null)
+        var dto = await _projectService.GetProjectByIdAsync(id);
+        if (dto == null)
             return NotFound();
 
-        return View(project);
+        var vm = _mapper.Map<ProjectDetailVm>(dto);
+        return View(vm);
     }
 
     [Authorize]
