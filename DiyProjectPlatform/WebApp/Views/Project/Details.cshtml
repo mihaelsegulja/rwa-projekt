@@ -5,27 +5,33 @@
 
 <h2>@Model.Project.Title</h2>
 
-<p><strong>Author:</strong> @Model.Project.UserId</p>
-<p><strong>Topic:</strong> @Model.Project.TopicId</p>
+<p><strong>Author:</strong> @Model.Username</p>
+<p><strong>Topic:</strong> @Model.TopicName</p>
+<p><strong>Difficulty:</strong> @Model.DifficultyLevelName</p>
 <p><strong>Description:</strong> @Model.Project.Description</p>
-<p><strong>Content:</strong></p>
-<p>@Model.Project.Content</p>
 
 <h4>Materials Used</h4>
 <ul>
-    @foreach (var id in Model.MaterialIds)
+    @foreach (var material in Model.Materials)
     {
-        <li>Material ID: @id</li> @* You can map ID to name if needed *@
+        <li>@material.Name</li>
     }
 </ul>
 
-<h4>Images</h4>
-<div class="row row-cols-1 row-cols-md-2 g-4">
-    @foreach (var img in Model.Images)
-    {
-        <div class="col">
-            <img src="data:image/png;base64,@img.ImageData" class="img-fluid rounded shadow-sm" />
-            <p>@img.Description</p>
-        </div>
-    }
-</div>
+<hr />
+<p>@Html.Raw(Model.Project.Content)</p>
+<hr />
+
+@if(Model.Images.Count > 0)
+{
+    <h4>Images</h4>
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var img in Model.Images)
+        {
+            <div class="col">
+                <img src="data:image/png;base64,@img.ImageData" class="img-fluid rounded shadow-sm" />
+                <p><i>@img.Description</i></p>
+            </div>
+        }
+    </div>
+}

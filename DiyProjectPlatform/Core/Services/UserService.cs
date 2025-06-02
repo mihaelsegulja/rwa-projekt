@@ -51,7 +51,7 @@ public class UserService : IUserService
 
         var role = await _dbContext.UserRoles
             .FirstOrDefaultAsync(r => r.Id == user.UserRoleId);
-        string token = JwtTokenHelper.CreateToken(loginDto.Username, user.Id.ToString(), role?.Name ?? nameof(Enums.UserRole.User));
+        string token = JwtTokenHelper.CreateToken(loginDto.Username, user.Id.ToString(), role?.Name ?? nameof(Shared.Enums.UserRole.User));
         return token;
     }
 

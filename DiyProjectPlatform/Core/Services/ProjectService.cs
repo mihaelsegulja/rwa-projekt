@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Core.Context;
 using Core.Dtos;
-using Core.Enums;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
@@ -23,9 +22,9 @@ public class ProjectService : IProjectService
     {
         var projects = await _dbContext.Projects
             .Where(p => p.ProjectStatuses.Any(ps =>
-                userRole == nameof(Enums.UserRole.Admin)
-                    ? ps.StatusTypeId != (int)Enums.ProjectStatusType.Deleted
-                    : ps.StatusTypeId == (int)Enums.ProjectStatusType.Approved))
+                userRole == nameof(Shared.Enums.UserRole.Admin)
+                    ? ps.StatusTypeId != (int)Shared.Enums.ProjectStatusType.Deleted
+                    : ps.StatusTypeId == (int)Shared.Enums.ProjectStatusType.Approved))
             .Include(p => p.User)
             .Include(p => p.Topic)
             .Include(p => p.DifficultyLevel)
@@ -52,23 +51,34 @@ public class ProjectService : IProjectService
     public async Task<ProjectDetailDto?> GetProjectByIdAsync(int id)
     {
         var project = await _dbContext.Projects
-            .Include(p => p.ProjectMaterials)
-                .ThenInclude(pm => pm.Material)
-            .Include(p => p.ProjectImages)
-                .ThenInclude(pi => pi.Image)
-            .FirstOrDefaultAsync(p => p.Id == id);
+       .Include(p => p.ProjectMaterials)
+           .ThenInclude(pm => pm.Material)
+       .Include(p => p.ProjectImages)
+           .ThenInclude(pi => pi.Image)
+       .Include(p => p.User)
+       .Include(p => p.Topic)
+       .Include(p => p.DifficultyLevel)
+       .FirstOrDefaultAsync(p => p.Id == id);
 
         if (project == null) return null;
 
         var dto = new ProjectDetailDto
         {
             Project = _mapper.Map<ProjectDto>(project),
-            MaterialIds = project.ProjectMaterials.Select(pm => pm.MaterialId).ToList(),
+            Materials = project.ProjectMaterials.Select(pm => new MaterialDto
+            {
+                Id = pm.MaterialId,
+                Name = pm.Material.Name
+            }).ToList(),
             Images = project.ProjectImages.Select(pi => new ImageDto
             {
                 ImageData = pi.Image.ImageData,
+                Description = pi.Image.Description,
                 IsMainImage = pi.IsMainImage
-            }).ToList()
+            }).ToList(),
+            Username = project.User.Username,
+            TopicName = project.Topic.Name,
+            DifficultyLevelName = project.DifficultyLevel.Name
         };
 
         return dto;
@@ -84,49 +94,110 @@ public class ProjectService : IProjectService
         return _mapper.Map<IEnumerable<ProjectStatusDto>>(statuses);
     }
 
-    public async Task<string> AddProjectAsync(ProjectDetailDto projectDetailDto)
+    public async Task<string> AddProjectAsync(ProjectCreateDto projectCreateDto, int currentUserId)
     {
-        var project = _mapper.Map<Project>(projectDetailDto.Project);
+        var project = _mapper.Map<Project>(projectCreateDto.Project);
         project.DateCreated = DateTime.UtcNow;
+        project.DateModified = DateTime.UtcNow;
+        project.UserId = currentUserId;
 
         await _dbContext.Projects.AddAsync(project);
         await _dbContext.SaveChangesAsync();
 
-        var materials = projectDetailDto.MaterialIds.Select(id => new ProjectMaterial { ProjectId = project.Id, MaterialId = id });
+        var materials = projectCreateDto.MaterialIds
+            .Select(id => new ProjectMaterial
+            {
+                ProjectId = project.Id,
+                MaterialId = id
+            }).ToList();
+
         await _dbContext.ProjectMaterials.AddRangeAsync(materials);
 
-        foreach (var imageDto in projectDetailDto.Images)
+        if (projectCreateDto.Images.Count > 0)
         {
-            var image = _mapper.Map<Image>(imageDto);
-            image.DateAdded = DateTime.UtcNow;
-            await _dbContext.Images.AddAsync(image);
-            await _dbContext.SaveChangesAsync();
+            var projectImages = new List<ProjectImage>();
+            foreach (var imageDto in projectCreateDto.Images)
+            {
+                var image = _mapper.Map<Image>(imageDto);
+                image.DateAdded = DateTime.UtcNow;
+                await _dbContext.Images.AddAsync(image);
+                await _dbContext.SaveChangesAsync();
 
-            var pi = new ProjectImage { ProjectId = project.Id, ImageId = image.Id, IsMainImage = imageDto.IsMainImage };
-            await _dbContext.ProjectImages.AddAsync(pi);
+                projectImages.Add(new ProjectImage
+                {
+                    ProjectId = project.Id,
+                    ImageId = image.Id,
+                    IsMainImage = imageDto.IsMainImage
+                });
+            }
+
+            await _dbContext.ProjectImages.AddRangeAsync(projectImages); 
         }
+
+        var isAdmin = await _dbContext.Users
+            .Where(u => u.Id == currentUserId)
+            .Select(u => u.UserRoleId == (int)Shared.Enums.UserRole.Admin)
+            .FirstOrDefaultAsync();
 
         var status = new ProjectStatus
         {
             ProjectId = project.Id,
-            StatusTypeId = (int)Enums.ProjectStatusType.Pending,
+            StatusTypeId = isAdmin
+                ? (int)Shared.Enums.ProjectStatusType.Approved
+                : (int)Shared.Enums.ProjectStatusType.Pending,
+            ApproverId = isAdmin ? currentUserId : null,
             DateModified = DateTime.UtcNow
         };
+
         await _dbContext.ProjectStatuses.AddAsync(status);
+
         await _dbContext.SaveChangesAsync();
 
-        return "Project added";
+        return "Project added successfully";
     }
 
-    public async Task<string?> UpdateProjectAsync(ProjectDto projectDto)
+
+    public async Task<string?> UpdateProjectAsync(ProjectUpdateDto projectUpdateDto, int currentUserId)
     {
-        var project = await _dbContext.Projects.FirstOrDefaultAsync(p => p.Id == projectDto.Id);
-        if (project == null) return null;
+        var project = await _dbContext.Projects
+        .Include(p => p.ProjectMaterials)
+        .FirstOrDefaultAsync(p => p.Id == projectUpdateDto.Project.Id);
 
-        _mapper.Map(projectDto, project);
+        if (project == null)
+            return null;
+
+        var canUpdate = await _dbContext.Users
+            .Where(u => u.Id == currentUserId || u.UserRoleId == (int)Shared.Enums.UserRole.Admin)
+            .FirstOrDefaultAsync();
+
+        if (canUpdate == null)
+            return "You do not have permission to update this project";
+
+        // Update core project info
+        _mapper.Map(projectUpdateDto.Project, project);
         project.DateModified = DateTime.UtcNow;
-        await _dbContext.SaveChangesAsync();
 
+        // Replace materials
+        var existingMaterialIds = project.ProjectMaterials.Select(pm => pm.MaterialId).ToList();
+        var newMaterialIds = projectUpdateDto.MaterialIds;
+
+        // Remove old materials
+        var materialsToRemove = project.ProjectMaterials
+            .Where(pm => !newMaterialIds.Contains(pm.MaterialId))
+            .ToList();
+        _dbContext.ProjectMaterials.RemoveRange(materialsToRemove);
+
+        // Add new materials
+        var materialsToAdd = newMaterialIds
+            .Where(id => !existingMaterialIds.Contains(id))
+            .Select(id => new ProjectMaterial
+            {
+                ProjectId = project.Id,
+                MaterialId = id
+            });
+
+        await _dbContext.ProjectMaterials.AddRangeAsync(materialsToAdd);
+        await _dbContext.SaveChangesAsync();
         return "Project updated";
     }
 
@@ -147,7 +218,7 @@ public class ProjectService : IProjectService
         var status = await _dbContext.ProjectStatuses.FirstOrDefaultAsync(s => s.ProjectId == projectId);
         if (status == null) return null;
 
-        status.StatusTypeId = (int)Enums.ProjectStatusType.Deleted;
+        status.StatusTypeId = (int)Shared.Enums.ProjectStatusType.Deleted;
         status.DateModified = DateTime.UtcNow;
         status.ApproverId = currentUserId;
         await _dbContext.SaveChangesAsync();

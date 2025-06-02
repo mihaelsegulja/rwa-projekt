@@ -15,6 +15,8 @@ public class CoreMappingProfile : Profile
         CreateMap<User, UserProfileDto>().ReverseMap();
         CreateMap<Comment, CommentDto>().ReverseMap();
         CreateMap<Project, ProjectDto>().ReverseMap();
+        CreateMap<ProjectDto, Project>()
+            .ForMember(dest => dest.UserId, opt => opt.Ignore());
         CreateMap<ProjectStatus, ProjectStatusDto>().ReverseMap();
         CreateMap<Image, ImageDto>().ReverseMap();
         CreateMap<Log, LogDto>().ReverseMap();

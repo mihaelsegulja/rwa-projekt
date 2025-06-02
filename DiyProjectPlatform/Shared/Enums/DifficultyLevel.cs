@@ -1,4 +1,4 @@
-﻿namespace Core.Enums;
+﻿namespace Shared.Enums;
 
 public enum DifficultyLevel
 {

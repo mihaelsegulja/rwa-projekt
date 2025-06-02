@@ -1,24 +1,125 @@
-﻿@model IEnumerable<Core.Dtos.ProjectListDto>
+﻿@using WebApp.ViewModels
+@model IEnumerable<ProjectListVm>
 @{
     ViewData["Title"] = "Projects";
+}
+<style>
+    .card-img-top {
+        object-fit: cover;
+        height: 200px;
+    }
+
+    .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-text {
+        flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-height: 4.5em;
+    }
+
+    .card .btn + .btn {
+        margin-left: 0.5rem;
+    }
+</style>
+
+@section Scripts {
+    
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="deleteForm" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete the project "<strong id="projectTitle"></strong>"?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('confirmDeleteModal');
+        modal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const projectId = button.getAttribute('data-project-id');
+            const projectTitle = button.getAttribute('data-project-title');
+
+            // Update modal content
+            document.getElementById('projectTitle').textContent = projectTitle;
+
+            // Update form action
+            const form = document.getElementById('deleteForm');
+            form.action = `/Project/Delete/${projectId}`;
+        });
+    </script>
 }
 
 <h2 class="mb-4">Projects</h2>
 
-<div class="row row-cols-1 row-cols-md-2 g-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <!-- Future: search bar, filters go here -->
+    </div>
+
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Create Project
+        </a>
+    }
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     @foreach (var project in Model)
     {
         <div class="col">
-            <div class="card shadow-sm">
-                @if (!string.IsNullOrEmpty(project.MainImage))
-                {
-                    <img src="data:image/png;base64,@project.MainImage" class="card-img-top" alt="Main Image">
-                }
-                <div class="card-body">
+            <div class="card shadow-sm h-100">
+                <img src="@(string.IsNullOrEmpty(project.MainImage)
+                                         ? "assets/images/no_image.png"
+                                         : $"data:image/png;base64,{project.MainImage}")"
+                 class="card-img-top" alt="Main Image">
+
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">@project.Title</h5>
                     <p class="card-text">@project.Description</p>
-                    <p class="text-muted">By @project.Username, Topic: @project.TopicName</p>
-                    <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">View</a>
+                    <p class="text-muted mb-3">By @project.Author</p>
+                    <p class="text-muted mb-3">Topic: @project.TopicName</p>
+
+                    <div class="mt-auto">
+                        <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary">View</a>
+                    @if (User.IsInRole(nameof(Shared.Enums.UserRole.Admin)) || User.Identity?.Name == project.Author)
+                        {
+                            <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-secondary">Edit</a>
+                            <button type="button"
+                                    class="btn btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteModal"
+                                    data-project-id="@project.Id"
+                                    data-project-title="@project.Title">
+                                Delete
+                            </button>
+                        }
+                    </div>
                 </div>
             </div>
         </div>

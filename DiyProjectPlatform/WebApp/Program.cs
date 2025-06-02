@@ -1,10 +1,10 @@
-
 using Core.Context;
 using Core.Interfaces;
 using Core.Mappings;
 using Core.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using WebApp.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +23,8 @@ builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ILogService, LogService>();
 
 builder.Services.AddAutoMapper(
-    typeof(CoreMappingProfile)
+    typeof(CoreMappingProfile),
+    typeof(WebAppMappingProfile)
 );
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -43,6 +44,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
+
 app.UseStaticFiles();
 
 app.UseRouting();

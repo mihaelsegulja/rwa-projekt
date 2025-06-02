@@ -1,0 +1,61 @@
+﻿@using WebApp.ViewModels
+@model ProjectEditVm
+
+@section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#summernote').summernote({ height: 300 });
+        });
+    </script>
+}
+
+<h2>Edit Project</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Project.Id" />
+
+    <div class="mb-3">
+        <label asp-for="Project.Title" class="form-label"></label>
+        <input asp-for="Project.Title" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Project.Description" class="form-label"></label>
+        <textarea asp-for="Project.Description" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Project.Content" class="form-label"></label>
+        <textarea asp-for="Project.Content" id="summernote" class="form-control">@Model.Project.Content</textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Project.TopicId" class="form-label">Topic</label>
+        <select asp-for="Project.TopicId" asp-items="Model.Topics" class="form-select"></select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Project.DifficultyLevelId" class="form-label">Difficulty</label>
+        <select asp-for="Project.DifficultyLevelId" asp-items="Model.DifficultyLevels" class="form-select"></select>
+    </div>
+
+    <div class="mb-3">
+        <label>Materials</label>
+        @foreach (var material in Model.AllMaterials)
+        {
+            <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="SelectedMaterialIds"
+                       value="@material.Value"
+                       @(Model.SelectedMaterialIds.Contains(int.Parse(material.Value)) ? "checked" : "") />
+                <label class="form-check-label">@material.Text</label>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

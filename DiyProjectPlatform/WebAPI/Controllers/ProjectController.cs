@@ -2,9 +2,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Core.Dtos;
-using Core.Models;
 using Core.Interfaces;
 using Shared.Helpers;
 
@@ -53,7 +51,7 @@ public class ProjectController : ControllerBase
         }
     }
 
-    [Authorize(Roles = nameof(Core.Enums.UserRole.Admin))]
+    [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
     [HttpGet("statuses")]
     public async Task<IActionResult> GetAllProjectStatuses(int page = 1, int pageSize = 10)
     {
@@ -69,11 +67,12 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPost("add")]
-    public async Task<IActionResult> AddProject(ProjectDetailDto projectDetail)
+    public async Task<IActionResult> AddProject(ProjectCreateDto project)
     {
         try
         {
-            var result = _projectService.AddProjectAsync(projectDetail);
+            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            var result = await _projectService.AddProjectAsync(project, currentUserId);
             return Ok(result);
         }
         catch (Exception e)
@@ -83,11 +82,12 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateProject(ProjectDto project)
+    public async Task<IActionResult> UpdateProject(ProjectUpdateDto projectUpdateDto)
     {
         try
         {
-            var result = await _projectService.UpdateProjectAsync(project);
+            var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            var result = await _projectService.UpdateProjectAsync(projectUpdateDto, currentUserId);
             return result == null ? NotFound() : Ok(result);
         }
         catch (Exception e)
@@ -96,7 +96,7 @@ public class ProjectController : ControllerBase
         }
     }
 
-    [Authorize(Roles = nameof(Core.Enums.UserRole.Admin))]
+    [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
     [HttpPut("update-status")]
     public async Task<IActionResult> UpdateProjectStatus(ProjectStatusDto projectStatus)
     {

@@ -7,7 +7,7 @@ namespace WebAPI.Controllers;
 
 [Route("api/log")]
 [ApiController]
-[Authorize(Roles = nameof(Core.Enums.UserRole.Admin))]
+[Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
 public class LogController : ControllerBase
 {
     private readonly ILogService _logService;

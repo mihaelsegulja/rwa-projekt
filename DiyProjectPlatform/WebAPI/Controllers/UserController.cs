@@ -53,7 +53,7 @@ public class UserController : ControllerBase
         }
     }
 
-    [Authorize(Roles = nameof(Core.Enums.UserRole.Admin))]
+    [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
     [HttpGet("all")]
     public async Task<IActionResult> GetAllUsers(int page = 1, int pageSize = 10)
     {
@@ -99,7 +99,7 @@ public class UserController : ControllerBase
         }
     }
     
-    [Authorize(Roles = nameof(Core.Enums.UserRole.Admin))]
+    [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteUser(int id)
     {
