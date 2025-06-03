@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
 using Core.Dtos;
 using Core.Interfaces;
-using Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shared.Helpers;
 using System.Security.Claims;
 
@@ -53,7 +51,7 @@ public class CommentController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> UpdateComment(CommentDto comment)
+    public async Task<IActionResult> UpdateComment(CommentUpdateDto comment)
     {
         try
         {

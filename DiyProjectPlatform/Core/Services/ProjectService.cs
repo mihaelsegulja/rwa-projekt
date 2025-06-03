@@ -180,11 +180,14 @@ public class ProjectService : IProjectService
         if (project == null)
             return null;
 
-        var canUpdate = await _dbContext.Users
-            .Where(u => u.Id == currentUserId || u.UserRoleId == (int)Shared.Enums.UserRole.Admin)
-            .FirstOrDefaultAsync();
+        var currentUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
+        if (currentUser == null)
+            return "User not found";
 
-        if (canUpdate == null)
+        var isAuthor = project.UserId == currentUserId;
+        var isAdmin = currentUser.UserRoleId == (int)Shared.Enums.UserRole.Admin;
+
+        if (!isAuthor && !isAdmin)
             return "You do not have permission to update this project";
 
         // Update core project info

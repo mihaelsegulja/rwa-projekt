@@ -19,14 +19,16 @@ public class ProjectController : Controller
     private readonly IProjectService _projectService;
     private readonly ITopicService _topicService;
     private readonly IMaterialService _materialService;
+    private readonly ICommentService _commentService;
     private readonly IMapper _mapper;
 
-    public ProjectController(IProjectService projectService, IMapper mapper, ITopicService topicService, IMaterialService materialService)
+    public ProjectController(IProjectService projectService, IMapper mapper, ITopicService topicService, IMaterialService materialService, ICommentService commentService)
     {
         _projectService = projectService;
         _mapper = mapper;
         _topicService = topicService;
         _materialService = materialService;
+        _commentService = commentService;
     }
 
     public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
@@ -43,7 +45,18 @@ public class ProjectController : Controller
         if (dto == null)
             return NotFound();
 
+        var commentDtos = await _commentService.GetAllCommentsByProjectIdAsync(id, 1, 50);
+
         var vm = _mapper.Map<ProjectDetailVm>(dto);
+
+        vm.Comments = commentDtos.Select(c => new CommentVm
+        {
+            Id = c.Id,
+            Content = c.Content,
+            DateCreated = c.DateCreated,
+            Username = c.Username
+        }).ToList();
+
         return View(vm);
     }
 
@@ -185,5 +198,16 @@ public class ProjectController : Controller
         if (result == null) return NotFound();
 
         return RedirectToAction("Index");
+    }
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> AddComment(CommentDto dto)
+    {
+        dto.UserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+        dto.DateCreated = DateTime.UtcNow;
+
+        await _commentService.AddCommentAsync(dto);
+        return RedirectToAction("Details", new { id = dto.ProjectId });
     }
 }

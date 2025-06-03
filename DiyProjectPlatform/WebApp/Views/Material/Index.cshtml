@@ -1,0 +1,26 @@
+﻿<h2>Materials</h2>
+<form asp-action="Add" method="post">
+    <input type="text" name="name" class="form-control mb-2" placeholder="Add new material" />
+    <button type="submit" class="btn btn-primary">Add</button>
+</form>
+
+<table class="table mt-4">
+    <thead>
+        <tr><th>ID</th><th>Name</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var material in Model)
+        {
+            <tr>
+                <td>@material.Id</td>
+                <td>
+                    <form asp-action="Update" method="post" class="d-flex">
+                        <input type="hidden" name="id" value="@material.Id" />
+                        <input type="text" name="name" value="@material.Name" class="form-control me-2" />
+                        <button type="submit" class="btn btn-sm btn-secondary">Update</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

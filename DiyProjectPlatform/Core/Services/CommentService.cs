@@ -21,11 +21,11 @@ public class CommentService : ICommentService
     public async Task<IEnumerable<CommentDto>> GetAllCommentsByProjectIdAsync(int projectId, int page, int pageSize)
     {
         var comments = await _dbContext.Comments
+            .Include(c => c.User)
             .Where(c => c.ProjectId == projectId)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync();
-
+            .ToListAsync();        
         return _mapper.Map<IEnumerable<CommentDto>>(comments);
     }
 
@@ -38,12 +38,12 @@ public class CommentService : ICommentService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<string?> UpdateCommentAsync(CommentDto commentDto, int currentUserId)
+    public async Task<string?> UpdateCommentAsync(CommentUpdateDto commentDto, int currentUserId)
     {
         var existing = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == commentDto.Id && c.UserId == currentUserId);
         if (existing == null) return null;
 
-        _mapper.Map(commentDto, existing);
+        existing.Content = commentDto.Content;
         await _dbContext.SaveChangesAsync();
         return "Comment updated";
     }
