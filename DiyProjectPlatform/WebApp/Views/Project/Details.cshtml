@@ -1,7 +1,12 @@
-﻿@model WebApp.ViewModels.ProjectDetailVm
+﻿@using WebApp.ViewModels
+@model ProjectDetailVm
+@{
+    ViewData["Title"] = "Project Details";
+}
 
 <h1>@Model.Title</h1>
 <hr/>
+
 <p><strong>Author:</strong> @Model.Author</p>
 <p><strong>Topic:</strong> @Model.TopicName</p>
 <p><strong>Created:</strong> @Model.DateCreated</p>
@@ -10,17 +15,13 @@
 <p><strong>Description:</strong> @Model.Description</p>
 
 <h4>Materials Used</h4>
-<ul>
-    @foreach (var name in Model.MaterialNames)
-    {
-        <li>@name</li>
-    }
-</ul>
-
+@foreach (var name in Model.MaterialNames)
+{
+    <span class="badge bg-secondary me-1">@name</span>
+}
 <hr />
 
 <p>@Html.Raw(Model.Content)</p>
-
 <hr />
 
 @if (Model.Images.Any())
@@ -81,7 +82,6 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <p class="card-subtitle text-muted small">Posted on @comment.DateCreated.ToString("f") by @comment.Username</p>
-                    <p class="card-text">@comment.Content</p>
 
                     @if (User.IsInRole("Admin") || User.Identity?.Name == comment.Username)
                     {
@@ -91,14 +91,18 @@
                             <textarea name="Content" class="form-control mb-1">@comment.Content</textarea>
                             <button type="submit" class="btn btn-sm btn-outline-secondary">Update</button>
                         </form>
+                        if (User.IsInRole("Admin"))
+                        {
+                            <form asp-controller="Comment" asp-action="Delete" method="post">
+                                <input type="hidden" name="id" value="@comment.Id" />
+                                <input type="hidden" name="projectId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        }
                     }
-                    @if (User.IsInRole("Admin"))
+                    else
                     {
-                        <form asp-controller="Comment" asp-action="Delete" method="post">
-                            <input type="hidden" name="id" value="@comment.Id" />
-                            <input type="hidden" name="projectId" value="@Model.Id" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                        </form>
+                        <p class="card-text">@comment.Content</p>
                     }
                 </div>
             </div>

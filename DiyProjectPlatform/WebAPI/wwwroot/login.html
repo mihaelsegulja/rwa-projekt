@@ -40,6 +40,10 @@
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
 
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status" style="display:none"></div>
+        </div>
+
         <div id="error" class="text-danger mt-3 text-center"></div>
 
         <div>Don't have an account? <a href="register.html">Register here</a></div>
@@ -48,6 +52,12 @@
     <script>
         document.getElementById("loginForm").addEventListener("submit", async function (e) {
             e.preventDefault();
+
+            const spinner = document.querySelector(".spinner-border");
+            spinner.style.display = 'block';
+
+            const btnSubmit = document.querySelector("button[type='submit']");
+            btnSubmit.setAttribute("disabled", "disabled");
 
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
@@ -89,6 +99,9 @@
             } else {
                 document.getElementById("error").textContent = "Login failed. Please check your credentials.";
             }
+
+            spinner.style.display = 'none';
+            btnSubmit.removeAttribute("disabled");
         });
     </script>
 </body>

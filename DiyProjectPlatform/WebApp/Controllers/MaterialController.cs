@@ -22,22 +22,31 @@ public class MaterialController : Controller
     public async Task<IActionResult> Index()
     {
         var materials = await _materialService.GetAllMaterialsAsync();
-        return View(materials);
+        return View(_mapper.Map<List<MaterialVm>>(materials));
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add(string name)
+    public async Task<IActionResult> Add(MaterialVm vm)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return BadRequest("Name is required"); //TODO: Change this
+        if (!ModelState.IsValid)
+        {
+            var materials = await _materialService.GetAllMaterialsAsync();
+            return View("Index", _mapper.Map<List<MaterialVm>>(materials));
+        }
 
-        await _materialService.AddMaterialAsync(name.Trim());
+        await _materialService.AddMaterialAsync(vm.Name.Trim());
         return RedirectToAction("Index");
     }
 
     [HttpPost]
     public async Task<IActionResult> Update(MaterialVm vm)
     {
+        if (!ModelState.IsValid)
+        {
+            var materials = await _materialService.GetAllMaterialsAsync();
+            return View("Index", _mapper.Map<List<MaterialVm>>(materials));
+        }
+
         vm.Name = vm.Name.Trim();
         var dto = _mapper.Map<MaterialDto>(vm);
         await _materialService.UpdateMaterialAsync(dto);

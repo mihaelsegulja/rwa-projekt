@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Projects";
 }
+
 <style>
     .card-img-top {
         object-fit: cover;
@@ -100,6 +101,7 @@
                     <p class="card-text">@project.Description</p>
                     <p class="text-muted mb-3">By @project.Author</p>
                     <p class="text-muted mb-3">Topic: @project.TopicName</p>
+                    <p class="text-muted mb-3">Created on: @project.DateCreated</p>
 
                     <div class="mt-auto">
                         <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary"><i class="bi bi-eye-fill"></i> View</a>

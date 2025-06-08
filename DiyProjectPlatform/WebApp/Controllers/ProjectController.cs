@@ -89,7 +89,6 @@ public class ProjectController : Controller
     {
         if (!ModelState.IsValid)
         {
-            // repopulate dropdowns if validation fails
             vm.Topics = (await _topicService.GetAllTopicsAsync())
                 .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList();
             vm.AllMaterials = (await _materialService.GetAllMaterialsAsync()).ToList();
@@ -111,7 +110,7 @@ public class ProjectController : Controller
 
         var createDto = new ProjectCreateDto
         {
-            Project = vm.Project,
+            Project = _mapper.Map<ProjectDto>(vm.Project),
             MaterialIds = vm.SelectedMaterialIds,
             Images = images ?? new()
         };
@@ -134,7 +133,7 @@ public class ProjectController : Controller
 
         var vm = new ProjectEditVm
         {
-            Project = projectDetail.Project,
+            Project = _mapper.Map<ProjectVm>(projectDetail.Project),
             AllMaterials = materials.Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Name }).ToList(),
             SelectedMaterialIds = projectDetail.Materials.Select(m => m.Id).ToList(),
             Topics = topics.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList(),
@@ -154,7 +153,6 @@ public class ProjectController : Controller
     {
         if (!ModelState.IsValid)
         {
-            // repopulate selects in case of error
             var materials = await _materialService.GetAllMaterialsAsync();
             var topics = await _topicService.GetAllTopicsAsync();
             vm.AllMaterials = materials.Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Name }).ToList();
@@ -171,7 +169,7 @@ public class ProjectController : Controller
 
         var updateDto = new ProjectUpdateDto
         {
-            Project = vm.Project,
+            Project = _mapper.Map<ProjectDto>(vm.Project),
             MaterialIds = vm.SelectedMaterialIds
         };
 

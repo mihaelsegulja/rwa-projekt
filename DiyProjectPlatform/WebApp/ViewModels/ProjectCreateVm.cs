@@ -6,7 +6,7 @@ namespace WebApp.ViewModels;
 
 public class ProjectCreateVm
 {
-    public ProjectDto Project { get; set; } = new();
+    public ProjectVm Project { get; set; } = new();
     public List<int> SelectedMaterialIds { get; set; } = new();
     public List<ImageDto> Images { get; set; } = new();
     public List<SelectListItem> Topics { get; set; } = new();

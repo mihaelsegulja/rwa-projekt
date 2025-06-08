@@ -22,22 +22,31 @@ public class TopicController : Controller
     public async Task<IActionResult> Index()
     {
         var topics = await _topicService.GetAllTopicsAsync();
-        return View(topics);
+        return View(_mapper.Map<List<TopicVm>>(topics));
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add(string name)
+    public async Task<IActionResult> Add(TopicVm vm)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return BadRequest("Name is required"); //TODO: Change this
+        if (!ModelState.IsValid)
+        {
+            var topics = await _topicService.GetAllTopicsAsync();
+            return View("Index", _mapper.Map<List<TopicVm>>(topics));
+        }
 
-        await _topicService.AddTopicAsync(name.Trim());
+        await _topicService.AddTopicAsync(vm.Name.Trim());
         return RedirectToAction("Index");
     }
 
     [HttpPost]
     public async Task<IActionResult> Update(TopicVm vm)
     {
+        if (!ModelState.IsValid)
+        {
+            var topics = await _topicService.GetAllTopicsAsync();
+            return View("Index", _mapper.Map<List<TopicVm>>(topics));
+        }
+
         vm.Name = vm.Name.Trim();
         var dto = _mapper.Map<TopicDto>(vm);
         await _topicService.UpdateTopicAsync(dto);

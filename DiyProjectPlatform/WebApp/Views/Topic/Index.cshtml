@@ -1,6 +1,17 @@
-﻿<h2>Topics</h2>
-<form asp-action="Add" method="post">
-    <input type="text" name="name" class="form-control mb-2" placeholder="Add new topic" />
+﻿@using WebApp.ViewModels
+@model List<TopicVm>
+@{
+    ViewData["Title"] = "Manage Topics";
+    var newTopic = new TopicVm();
+}
+
+<h2>Topics</h2>
+
+<form asp-action="Add" method="post" asp-antiforgery="true" class="mb-4">
+    <div class="mb-2">
+        <input asp-for="@newTopic.Name" class="form-control" placeholder="Add new topic" />
+        <span asp-validation-for="@newTopic.Name" class="text-danger"></span>
+    </div>
     <button type="submit" class="btn btn-primary">Add</button>
 </form>
 
@@ -9,14 +20,15 @@
         <tr><th>ID</th><th>Name</th></tr>
     </thead>
     <tbody>
-        @foreach (var topic in Model)
+        @for (int i = 0; i < Model.Count; i++)
         {
             <tr>
-                <td>@topic.Id</td>
+                <td>@Model[i].Id</td>
                 <td>
-                    <form asp-action="Update" method="post" class="d-flex">
-                        <input type="hidden" name="id" value="@topic.Id" />
-                        <input type="text" name="name" value="@topic.Name" class="form-control me-2" />
+                    <form asp-action="Update" method="post" class="d-flex align-items-center">
+                        <input asp-for="@Model[i].Id" type="hidden" />
+                        <input asp-for="@Model[i].Name" class="form-control me-2" />
+                        <span asp-validation-for="@Model[i].Name" class="text-danger me-2"></span>
                         <button type="submit" class="btn btn-sm btn-secondary">Update</button>
                     </form>
                 </td>
@@ -24,3 +36,7 @@
         }
     </tbody>
 </table>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

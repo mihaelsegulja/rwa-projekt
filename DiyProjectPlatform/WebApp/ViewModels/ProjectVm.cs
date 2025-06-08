@@ -1,0 +1,25 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebApp.ViewModels;
+
+public class ProjectVm
+{
+    public int Id { get; set; }
+
+    [Required(ErrorMessage = "Title is required.")]
+    [MinLength(3, ErrorMessage = "Title must contain minimum 3 characters.")]
+    public string Title { get; set; }
+    public DateTime DateCreated { get; set; }
+    public DateTime DateModified { get; set; }
+
+    [Required(ErrorMessage = "Description is required.")]
+    [MinLength(3, ErrorMessage = "Title must contain minimum 3 characters.")]
+    public string Description { get; set; }
+
+    [Required(ErrorMessage = "Content is required.")]
+    [MinLength(20, ErrorMessage = "Content must contain minimum 20 characters.")]
+    public string Content { get; set; }
+    public int TopicId { get; set; }
+    public int UserId { get; set; }
+    public int DifficultyLevelId { get; set; }
+}
