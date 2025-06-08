@@ -1,15 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Shared.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.ViewModels;
 
 public class ChangePasswordVm
 {
-    [Required]
+    [Required(ErrorMessage = "Old password is required.")]
     public string CurrentPassword { get; set; }
+
     [Required]
-    [StringLength(255, MinimumLength = 8, ErrorMessage = "New Password should be at least 8 characters long")]
+    [RegularExpression(RegexConstants.PasswordPattern, 
+        ErrorMessage = "Password must be at least 8 characters long, contain at least 1 uppercase letter, 1 lowercase letter, and 1 digit.")]
     public string NewPassword { get; set; }
+
     [Required]
-    [Compare("NewPassword")]
+    [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
     public string ConfirmPassword { get; set; }
 }

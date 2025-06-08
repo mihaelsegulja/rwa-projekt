@@ -4,6 +4,7 @@ using Core.Dtos;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
 using Shared.Helpers;
 
 namespace Core.Services;
@@ -12,11 +13,13 @@ public class UserService : IUserService
 {
     private readonly DbDiyProjectPlatformContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly ILogService _logService;
 
-    public UserService(DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public UserService(DbDiyProjectPlatformContext dbContext, IMapper mapper, ILogService logService)
     {
         _dbContext = dbContext;
         _mapper = mapper;
+        _logService = logService;
     }
 
     public async Task<string> UserRegisterAsync(UserRegisterDto registerDto)
@@ -36,6 +39,7 @@ public class UserService : IUserService
 
         await _dbContext.Users.AddAsync(user);
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"User {username} registered", LogLevel.Info);
 
         return "Success";
     }
@@ -51,7 +55,9 @@ public class UserService : IUserService
 
         var role = await _dbContext.UserRoles
             .FirstOrDefaultAsync(r => r.Id == user.UserRoleId);
+        
         string token = JwtTokenHelper.CreateToken(loginDto.Username, user.Id.ToString(), role?.Name ?? nameof(Shared.Enums.UserRole.User));
+        await _logService.AddLogAsync($"User {user.Id} logged in", LogLevel.Debug);
         return token;
     }
 
@@ -85,6 +91,8 @@ public class UserService : IUserService
         user.ProfilePicture = profileDto.ProfilePicture;
 
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"User {currentUserId} updated profile", LogLevel.Info);
+
         return "Profile updated";
     }
 
@@ -99,6 +107,8 @@ public class UserService : IUserService
         user.IsActive = false;
         user.DateDeleted = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Admin {adminId} deleted user {userId}", LogLevel.Info);
+
         return "User has been deleted";
     }
 
@@ -116,6 +126,8 @@ public class UserService : IUserService
         user.PasswordHash = newHash;
         user.PasswordSalt = newSalt;
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Password changed for user {userId}", LogLevel.Info);
+
         return "Password changed successfully";
     }
 }

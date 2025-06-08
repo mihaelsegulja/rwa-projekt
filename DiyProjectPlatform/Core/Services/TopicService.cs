@@ -4,18 +4,21 @@ using Core.Dtos;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
 
 namespace Core.Services;
 
 public class TopicService : ITopicService
 {
-    public readonly DbDiyProjectPlatformContext _dbContext;
+    private readonly DbDiyProjectPlatformContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly ILogService _logService;
 
-    public TopicService(DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public TopicService(DbDiyProjectPlatformContext dbContext, IMapper mapper, ILogService logService)
     {
         _dbContext = dbContext;
         _mapper = mapper;
+        _logService = logService;
     }
 
     public async Task<IEnumerable<TopicDto>> GetAllTopicsAsync()
@@ -40,17 +43,20 @@ public class TopicService : ITopicService
         var newTopic = new Topic { Name = trimmed };
         await _dbContext.Topics.AddAsync(newTopic);
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Topic {trimmed} added", LogLevel.Info);
 
         return $"Topic '{trimmed}' successfully added";
     }
 
     public async Task<string?> UpdateTopicAsync(TopicDto topicDto)
     {
-        var existing = await _dbContext.Topics.FindAsync(topicDto.Id);
-        if (existing == null) return null;
+        var topic = await _dbContext.Topics.FindAsync(topicDto.Id);
+        if (topic == null) return null;
 
-        existing.Name = topicDto.Name.Trim();
+        topic.Name = topicDto.Name.Trim();
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Topic {topic.Id} updated", LogLevel.Info);
+
         return $"Topic {topicDto.Id} successfully updated";
     }
 }

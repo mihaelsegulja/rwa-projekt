@@ -2,7 +2,9 @@
 using Core.Context;
 using Core.Dtos;
 using Core.Interfaces;
+using Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
 
 namespace Core.Services;
 
@@ -31,5 +33,18 @@ public class LogService : ILogService
     {
         var result = await _dbContext.Logs.CountAsync();
         return result;
+    }
+
+    public async Task AddLogAsync(string message, LogLevel level = LogLevel.None)
+    {
+        var logDto = new LogDto
+        {
+            Message = message,
+            Level = level.ToString(),
+            Timestamp = DateTime.UtcNow
+        };
+        var log = _mapper.Map<Log>(logDto);
+        _dbContext.Logs.Add(log);
+        await _dbContext.SaveChangesAsync();
     }
 }

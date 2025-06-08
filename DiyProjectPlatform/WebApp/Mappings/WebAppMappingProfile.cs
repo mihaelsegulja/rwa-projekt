@@ -9,8 +9,7 @@ public class WebAppMappingProfile : Profile
     public WebAppMappingProfile()
     {
         CreateMap<ProjectListDto, ProjectListVm>()
-            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.Username))
-            .ForMember(dest => dest.DateCreated, opt => opt.MapFrom(src => src.DateCreated));
+            .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.Username));
         CreateMap<ChangePasswordDto, ChangePasswordVm>().ReverseMap();
         CreateMap<UserProfileDto, UserProfileVm>().ReverseMap();
         CreateMap<UserDto, UserProfileVm>();

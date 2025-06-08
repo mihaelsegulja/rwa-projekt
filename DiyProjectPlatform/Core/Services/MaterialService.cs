@@ -3,12 +3,8 @@ using Core.Context;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Core.Dtos;
+using Shared.Enums;
 
 namespace Core.Services;
 
@@ -16,11 +12,13 @@ public class MaterialService : IMaterialService
 {
     private readonly DbDiyProjectPlatformContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly ILogService _logService;
 
-    public MaterialService(DbDiyProjectPlatformContext context, IMapper mapper)
+    public MaterialService(DbDiyProjectPlatformContext context, IMapper mapper, ILogService logService)
     {
         _dbContext = context;
         _mapper = mapper;
+        _logService = logService;
     }
 
     public async Task<IEnumerable<MaterialDto>> GetAllMaterialsAsync()
@@ -45,8 +43,9 @@ public class MaterialService : IMaterialService
         var material = new Material { Name = trimmed };
         await _dbContext.Materials.AddAsync(material);
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Material '{trimmed}' added", LogLevel.Info);
 
-        return $"Material '{trimmed}' successfully added";
+        return $"Material {trimmed} successfully added";
     }
 
     public async Task<string?> UpdateMaterialAsync(MaterialDto materialDto)
@@ -56,6 +55,8 @@ public class MaterialService : IMaterialService
 
         material.Name = materialDto.Name.Trim();
         await _dbContext.SaveChangesAsync();
-        return $"Material {materialDto.Id} successfully updated";
+        await _logService.AddLogAsync($"Material {material.Id} updated", LogLevel.Info);
+
+        return $"Material {material.Id} successfully updated";
     }
 }

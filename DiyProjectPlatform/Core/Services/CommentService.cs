@@ -4,6 +4,7 @@ using Core.Dtos;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
 
 namespace Core.Services;
 
@@ -11,11 +12,13 @@ public class CommentService : ICommentService
 {
     private readonly DbDiyProjectPlatformContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly ILogService _logService;
 
-    public CommentService(DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public CommentService(DbDiyProjectPlatformContext dbContext, IMapper mapper, ILogService logService)
     {
         _dbContext = dbContext;
         _mapper = mapper;
+        _logService = logService;
     }
 
     public async Task<IEnumerable<CommentDto>> GetAllCommentsByProjectIdAsync(int projectId, int page, int pageSize)
@@ -36,6 +39,8 @@ public class CommentService : ICommentService
         var comment = _mapper.Map<Comment>(commentDto);
         await _dbContext.Comments.AddAsync(comment);
         await _dbContext.SaveChangesAsync();
+
+        await _logService.AddLogAsync($"User {commentDto.UserId} commented on project {commentDto.ProjectId}", LogLevel.Info);
     }
 
     public async Task<string?> UpdateCommentAsync(CommentUpdateDto commentDto, int currentUserId)
@@ -45,6 +50,8 @@ public class CommentService : ICommentService
 
         existing.Content = commentDto.Content;
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"User {currentUserId} updated comment {commentDto.Id}", LogLevel.Info);
+
         return "Comment updated";
     }
 
@@ -56,6 +63,8 @@ public class CommentService : ICommentService
 
         existing.Content = "deleted";
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Comment {id} deleted", LogLevel.Info);
+
         return "Comment deleted";
     }
 }

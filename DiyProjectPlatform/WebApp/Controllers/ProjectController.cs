@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Core.Dtos;
 using Core.Interfaces;
-using Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -60,7 +59,6 @@ public class ProjectController : Controller
         return View(vm);
     }
 
-    [Authorize]
     [HttpGet]
     public async Task<IActionResult> Create()
     {
@@ -85,7 +83,6 @@ public class ProjectController : Controller
         return View(model);
     }
 
-    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ProjectCreateVm vm, string imagesJson)
@@ -170,7 +167,7 @@ public class ProjectController : Controller
             return View(vm);
         }
 
-        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
 
         var updateDto = new ProjectUpdateDto
         {
@@ -186,8 +183,6 @@ public class ProjectController : Controller
         return RedirectToAction("Index");
     }
 
-
-
     [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -198,16 +193,5 @@ public class ProjectController : Controller
         if (result == null) return NotFound();
 
         return RedirectToAction("Index");
-    }
-
-    [Authorize]
-    [HttpPost]
-    public async Task<IActionResult> AddComment(CommentDto dto)
-    {
-        dto.UserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-        dto.DateCreated = DateTime.UtcNow;
-
-        await _commentService.AddCommentAsync(dto);
-        return RedirectToAction("Details", new { id = dto.ProjectId });
     }
 }

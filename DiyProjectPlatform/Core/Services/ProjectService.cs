@@ -4,6 +4,7 @@ using Core.Dtos;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Enums;
 
 namespace Core.Services;
 
@@ -11,11 +12,13 @@ public class ProjectService : IProjectService
 {
     private readonly DbDiyProjectPlatformContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly ILogService _logService;
 
-    public ProjectService(DbDiyProjectPlatformContext dbContext, IMapper mapper)
+    public ProjectService(DbDiyProjectPlatformContext dbContext, IMapper mapper, ILogService logService)
     {
         _dbContext = dbContext;
         _mapper = mapper;
+        _logService = logService;
     }
 
     public async Task<IEnumerable<ProjectListDto>> GetAllProjectsAsync(string userRole, int page, int pageSize)
@@ -166,6 +169,7 @@ public class ProjectService : IProjectService
         await _dbContext.ProjectStatuses.AddAsync(status);
 
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Project {project.Id} created", LogLevel.Info);
 
         return "Project added successfully";
     }
@@ -188,7 +192,10 @@ public class ProjectService : IProjectService
         var isAdmin = currentUser.UserRoleId == (int)Shared.Enums.UserRole.Admin;
 
         if (!isAuthor && !isAdmin)
+        {
+            await _logService.AddLogAsync($"User {currentUserId} with no permission tried to update project {project.Id}", LogLevel.Warning);
             return "You do not have permission to update this project";
+        }
 
         // Update core project info
         _mapper.Map(projectUpdateDto.Project, project);
@@ -215,6 +222,8 @@ public class ProjectService : IProjectService
 
         await _dbContext.ProjectMaterials.AddRangeAsync(materialsToAdd);
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Project {project.Id} updated", LogLevel.Info);
+
         return "Project updated";
     }
 
@@ -226,6 +235,7 @@ public class ProjectService : IProjectService
         _mapper.Map(projectStatusDto, status);
         status.DateModified = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"User {status.ApproverId} updated project status {status.Id}", LogLevel.Info);
 
         return "Project status updated";
     }
@@ -239,6 +249,7 @@ public class ProjectService : IProjectService
         status.DateModified = DateTime.UtcNow;
         status.ApproverId = currentUserId;
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"User {currentUserId} deleted project {projectId}", LogLevel.Info);
 
         return "Project deleted";
     }

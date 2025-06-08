@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using Core.Dtos;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Helpers;
 using System.Security.Claims;
 using WebApp.ViewModels;
 
 namespace WebApp.Controllers;
 
+[Authorize]
 public class UserController : Controller
 {
     private readonly IUserService _userService;
@@ -21,7 +24,7 @@ public class UserController : Controller
     [HttpGet]
     public async Task<IActionResult> UpdateProfile()
     {
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var profile = await _userService.GetUserByIdAsync(userId);
         return View(_mapper.Map<UserProfileVm>(profile));
     }
@@ -32,7 +35,7 @@ public class UserController : Controller
         if (!ModelState.IsValid)
             return View(profile);
 
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var userProfile = _mapper.Map<UserProfileDto>(profile);
         var response = await _userService.UpdateUserProfileAsync(userId, userProfile);
         TempData["Success"] = response;
@@ -51,16 +54,16 @@ public class UserController : Controller
         if (!ModelState.IsValid)
             return View(vm);
 
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var dto = _mapper.Map<ChangePasswordDto>(vm);
         var result = await _userService.ChangeUserPasswordAsync(userId, dto);
         if (result != null)
         {
             ModelState.AddModelError(string.Empty, "Password change failed.");
-            return View(dto);
+            return View();
         }
 
-        TempData["Success"] = "Password changed.";
-        return RedirectToAction("UpdateProfile");
+        TempData["Success"] = result ?? "Password changed.";
+        return RedirectToAction("Index", "Home");
     }
 }
