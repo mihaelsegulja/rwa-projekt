@@ -3,12 +3,27 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "library": "summernote@0.9.1",
-      "destination": "wwwroot/lib/summernote/"
+      "provider": "cdnjs",
+      "library": "bootstrap-icons@1.11.3",
+      "destination": "wwwroot/assets/bootstrap-icons/",
+      "files": [
+        "font/bootstrap-icons.min.css",
+        "font/fonts/bootstrap-icons.woff",
+        "font/fonts/bootstrap-icons.woff2"
+      ]
     },
     {
-      "library": "bootstrap-icons@1.11.3",
-      "destination": "wwwroot/assets/bootstrap-icons/"
+      "provider": "cdnjs",
+      "library": "summernote@0.9.1",
+      "destination": "wwwroot/lib/summernote/",
+      "files": [
+        "font/summernote.eot",
+        "summernote-bs5.min.css",
+        "summernote-bs5.min.js",
+        "font/summernote.ttf",
+        "font/summernote.woff",
+        "font/summernote.woff2"
+      ]
     }
   ]
 }
