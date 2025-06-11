@@ -3,11 +3,12 @@ using Core.Dtos;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
 using WebApp.ViewModels;
 
 namespace WebApp.Controllers;
 
-[Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
+[Authorize(Roles = nameof(UserRole.Admin))]
 public class TopicController : Controller
 {
     private readonly ITopicService _topicService;
@@ -49,7 +50,12 @@ public class TopicController : Controller
 
         vm.Name = vm.Name.Trim();
         var dto = _mapper.Map<TopicDto>(vm);
-        await _topicService.UpdateTopicAsync(dto);
+        var result = await _topicService.UpdateTopicAsync(dto);
+        if (result != null)
+            TempData["Success"] = result;
+        else
+            TempData["Error"] = "Update failed";
+
         return RedirectToAction("Index");
     }
 }

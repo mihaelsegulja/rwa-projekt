@@ -59,7 +59,8 @@ public class CommentService : ICommentService
     {
         var existing = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
         if (existing == null) return null;
-        if (existing.Content == "deleted") return "Comment already deleted";
+        if (existing.Content == "deleted") 
+            return "Comment already deleted";
 
         existing.Content = "deleted";
         await _dbContext.SaveChangesAsync();

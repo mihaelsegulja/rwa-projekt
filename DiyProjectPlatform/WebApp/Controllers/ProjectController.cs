@@ -30,12 +30,66 @@ public class ProjectController : Controller
         _commentService = commentService;
     }
 
-    public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Index(ProjectFilterVm filter)
     {
         var userRole = ClaimsHelper.GetClaimValue(User, ClaimTypes.Role);
-        var projects = await _projectService.GetAllProjectsAsync(userRole, page, pageSize);
-        var vms = _mapper.Map<List<ProjectListVm>>(projects);
-        return View(vms);
+
+        var dto = _mapper.Map<ProjectFilterDto>(filter);
+        var result = await _projectService.GetAllProjectsAsync(userRole, dto);
+
+        var vm = new ProjectFilterVm
+        {
+            Projects = _mapper.Map<List<ProjectListVm>>(result.Items),
+            Page = result.Page,
+            PageSize = result.PageSize,
+            TotalItems = result.TotalItems,
+            Search = filter.Search,
+            TopicId = filter.TopicId,
+            DifficultyLevelId = filter.DifficultyLevelId
+        };
+
+        vm.Projects = _mapper.Map<List<ProjectListVm>>(result.Items);
+
+        var topics = await _topicService.GetAllTopicsAsync();
+        vm.Topics = topics.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList();
+
+        vm.DifficultyLevels = Enum.GetValues<DifficultyLevel>().Select(dl => new SelectListItem
+        {
+            Value = ((int)dl).ToString(),
+            Text = dl.ToString()
+        }).ToList();
+
+        return View(vm);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Search(ProjectFilterVm filter)
+    {
+        var userRole = ClaimsHelper.GetClaimValue(User, ClaimTypes.Role);
+        var dto = _mapper.Map<ProjectFilterDto>(filter);
+        var result = await _projectService.GetAllProjectsAsync(userRole, dto);
+
+        var vm = new ProjectFilterVm
+        {
+            Projects = _mapper.Map<List<ProjectListVm>>(result.Items),
+            Page = result.Page,
+            PageSize = result.PageSize,
+            TotalItems = result.TotalItems,
+            Search = filter.Search,
+            TopicId = filter.TopicId,
+            DifficultyLevelId = filter.DifficultyLevelId
+        };
+
+        var topics = await _topicService.GetAllTopicsAsync();
+        vm.Topics = topics.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList();
+
+        vm.DifficultyLevels = Enum.GetValues<Shared.Enums.DifficultyLevel>().Select(dl => new SelectListItem
+        {
+            Value = ((int)dl).ToString(),
+            Text = dl.ToString()
+        }).ToList();
+
+        return PartialView("_ProjectListPartial", vm);
     }
 
     public async Task<IActionResult> Details(int id)
@@ -64,8 +118,8 @@ public class ProjectController : Controller
     {
         var topics = await _topicService.GetAllTopicsAsync();
         var materials = await _materialService.GetAllMaterialsAsync();
-        var difficultyLevels = Enum.GetValues(typeof(Shared.Enums.DifficultyLevel))
-            .Cast<Shared.Enums.DifficultyLevel>()
+        var difficultyLevels = Enum.GetValues(typeof(DifficultyLevel))
+            .Cast<DifficultyLevel>()
             .Select(d => new SelectListItem
             {
                 Value = ((int)d).ToString(),
@@ -92,8 +146,8 @@ public class ProjectController : Controller
             vm.Topics = (await _topicService.GetAllTopicsAsync())
                 .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList();
             vm.AllMaterials = (await _materialService.GetAllMaterialsAsync()).ToList();
-            vm.DifficultyLevels = Enum.GetValues(typeof(Shared.Enums.DifficultyLevel))
-            .Cast<Shared.Enums.DifficultyLevel>()
+            vm.DifficultyLevels = Enum.GetValues(typeof(DifficultyLevel))
+            .Cast<DifficultyLevel>()
             .Select(d => new SelectListItem
             {
                 Value = ((int)d).ToString(),
@@ -117,7 +171,7 @@ public class ProjectController : Controller
 
         var result = await _projectService.AddProjectAsync(createDto, currentUserId);
 
-        TempData["SuccessMessage"] = result;
+        TempData["Success"] = result;
         return RedirectToAction("Index");
     }
 
@@ -128,6 +182,9 @@ public class ProjectController : Controller
         if (projectDetail == null)
             return NotFound();
 
+        if (User.Identity?.Name != projectDetail.Username && !User.IsInRole(nameof(UserRole.Admin)))
+            return Forbid();
+
         var materials = await _materialService.GetAllMaterialsAsync();
         var topics = await _topicService.GetAllTopicsAsync();
 
@@ -137,7 +194,7 @@ public class ProjectController : Controller
             AllMaterials = materials.Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Name }).ToList(),
             SelectedMaterialIds = projectDetail.Materials.Select(m => m.Id).ToList(),
             Topics = topics.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList(),
-            DifficultyLevels = Enum.GetValues<Shared.Enums.DifficultyLevel>().Select(dl => new SelectListItem
+            DifficultyLevels = Enum.GetValues<DifficultyLevel>().Select(dl => new SelectListItem
             {
                 Value = ((int)dl).ToString(),
                 Text = dl.ToString()
@@ -157,7 +214,7 @@ public class ProjectController : Controller
             var topics = await _topicService.GetAllTopicsAsync();
             vm.AllMaterials = materials.Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Name }).ToList();
             vm.Topics = topics.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList();
-            vm.DifficultyLevels = Enum.GetValues<Shared.Enums.DifficultyLevel>().Select(dl => new SelectListItem
+            vm.DifficultyLevels = Enum.GetValues<DifficultyLevel>().Select(dl => new SelectListItem
             {
                 Value = ((int)dl).ToString(),
                 Text = dl.ToString()
@@ -181,14 +238,22 @@ public class ProjectController : Controller
         return RedirectToAction("Index");
     }
 
-    [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var result = await _projectService.DeleteProjectAsync(id, userId);
-        if (result == null) return NotFound();
+        if (result != null)
+        {
+            TempData["Success"] = result;
+        }
+        else
+        {
+            TempData["Error"] = "Update failed";
+            return NotFound();
+        }
 
         return RedirectToAction("Index");
     }

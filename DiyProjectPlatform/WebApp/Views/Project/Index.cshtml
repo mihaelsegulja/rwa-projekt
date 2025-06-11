@@ -1,5 +1,5 @@
 ﻿@using WebApp.ViewModels
-@model IEnumerable<ProjectListVm>
+@model ProjectFilterVm
 @{
     ViewData["Title"] = "Projects";
 }
@@ -32,13 +32,46 @@
     .card .btn + .btn {
         margin-left: 0.5rem;
     }
+
+    #pagination-container {
+        margin-top: 20px;
+    }
 </style>
 
 <h2 class="mb-4">Projects</h2>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-        <!-- Future: search bar, filters go here -->
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-md-4">
+                <input type="text" name="Search" class="form-control" placeholder="Search by title" value="@Model.Search" />
+            </div>
+            <div class="col-md-3">
+                <select name="TopicId" class="form-select">
+                    <option value="">All Topics</option>
+                    @foreach (var topic in Model.Topics)
+                    {
+                        <option value="@topic.Value" selected="@(Model.TopicId.ToString() == topic.Value)">
+                            @topic.Text
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="DifficultyLevelId" class="form-select">
+                    <option value="">All Levels</option>
+                    @foreach (var level in Model.DifficultyLevels)
+                    {
+                        <option value="@level.Value" selected="@(Model.DifficultyLevelId.ToString() == level.Value)">
+                            @level.Text
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-outline-primary" type="submit">Search</button>
+            </div>
+        </form>
     </div>
 
     @if (User.Identity?.IsAuthenticated ?? false)
@@ -47,42 +80,8 @@
     }
 </div>
 
-<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    @foreach (var project in Model)
-    {
-        <div class="col">
-            <div class="card shadow-sm h-100">
-                <img src="@(string.IsNullOrEmpty(project.MainImage)
-                                         ? "assets/images/no_image.png"
-                                         : $"data:image/png;base64,{project.MainImage}")"
-                 class="card-img-top" alt="Main Image">
-
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">@project.Title</h5>
-                    <p class="card-text">@project.Description</p>
-                    <p class="text-muted mb-3">By @project.Author</p>
-                    <p class="text-muted mb-3">Topic: @project.TopicName</p>
-                    <p class="text-muted mb-3">Created on: @project.DateCreated</p>
-
-                    <div class="mt-auto">
-                        <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary"><i class="bi bi-eye-fill"></i> View</a>
-                    @if (User.IsInRole(nameof(Shared.Enums.UserRole.Admin)) || User.Identity?.Name == project.Author)
-                    {
-                        <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-secondary"><i class="bi bi-pencil-square"></i> Edit</a>
-                        <button type="button"
-                                class="btn btn-danger"
-                                data-bs-toggle="modal"
-                                data-bs-target="#confirmDeleteModal"
-                                data-project-id="@project.Id"
-                                data-project-title="@project.Title">
-                                <i class="bi bi-trash-fill"></i> Delete
-                        </button>
-                    }
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+<div id="projectResults">
+    @await Html.PartialAsync("_ProjectListPartial", Model)
 </div>
 
 @section Scripts {
@@ -93,7 +92,7 @@
                 <form id="deleteForm" method="post">
                     <div class="modal-header">
                         <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         Are you sure you want to delete the project "<strong id="projectTitle"></strong>"?
@@ -108,18 +107,47 @@
     </div>
 
     <script>
-        const modal = document.getElementById('confirmDeleteModal');
-        modal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const projectId = button.getAttribute('data-project-id');
-            const projectTitle = button.getAttribute('data-project-title');
+        $('#confirmDeleteModal').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget);
+            const projectId = button.data('project-id');
+            const projectTitle = button.data('project-title');
 
-            // Update modal content
-            document.getElementById('projectTitle').textContent = projectTitle;
+            $('#projectTitle').text(projectTitle);
+            $('#deleteForm').attr('action', `/Project/Delete/${projectId}`);
+        });
+    </script>
 
-            // Update form action
-            const form = document.getElementById('deleteForm');
-            form.action = `/Project/Delete/${projectId}`;
+    <script>
+        function fetchProjects(page = 1) {
+            showSpinner();
+
+            const search = $('input[name="Search"]').val();
+            const topicId = $('select[name="TopicId"]').val();
+            const difficulty = $('select[name="DifficultyLevelId"]').val();
+
+                $.get("/Project/Search", {
+                    search: search,
+                    topicId: topicId,
+                    difficultyLevelId: difficulty,
+                    page: page
+                }).done(function (data) {
+                    $('#projectResults').html(data);
+                }).fail(function () {
+                    showToast("Failed to load page", "error");
+                }).always(function () {
+                    hideSpinner();
+                });
+        }
+
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+            fetchProjects(1);
+        });
+
+        $(document).on('click', '.pagination a.page-link', function (e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            fetchProjects(page);
         });
     </script>
 }

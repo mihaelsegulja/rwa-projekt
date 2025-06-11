@@ -59,4 +59,16 @@ public class TopicService : ITopicService
 
         return $"Topic {topicDto.Id} successfully updated";
     }
+
+    public async Task<string?> DeleteTopicAsync(int id)
+    {
+        var topic = await _dbContext.Topics.FindAsync(id);
+        if (topic == null) return null;
+
+        _dbContext.Topics.Remove(topic);
+        await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Topic {id} deleted", LogLevel.Info);
+
+        return $"Topic {id} successfully deleted";
+    }
 }

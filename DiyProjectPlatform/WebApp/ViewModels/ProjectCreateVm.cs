@@ -1,6 +1,5 @@
 ﻿using Core.Dtos;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel.DataAnnotations;
 
 namespace WebApp.ViewModels;
 

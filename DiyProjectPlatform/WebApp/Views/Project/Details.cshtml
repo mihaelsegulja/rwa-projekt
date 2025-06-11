@@ -88,17 +88,14 @@
                         <form asp-controller="Comment" asp-action="Update" method="post" class="mb-2">
                             <input type="hidden" name="Id" value="@comment.Id" />
                             <input type="hidden" name="ProjectId" value="@Model.Id" />
-                            <textarea name="Content" class="form-control mb-1">@comment.Content</textarea>
+                            <textarea name="Content" class="form-control mb-1" required>@comment.Content</textarea>
                             <button type="submit" class="btn btn-sm btn-outline-secondary">Update</button>
                         </form>
-                        if (User.IsInRole("Admin"))
-                        {
-                            <form asp-controller="Comment" asp-action="Delete" method="post">
-                                <input type="hidden" name="id" value="@comment.Id" />
-                                <input type="hidden" name="projectId" value="@Model.Id" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                            </form>
-                        }
+                        <form asp-controller="Comment" asp-action="Delete" method="post">
+                            <input type="hidden" name="id" value="@comment.Id" />
+                            <input type="hidden" name="projectId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
                     }
                     else
                     {
@@ -119,7 +116,7 @@ else
     <form asp-controller="Comment" asp-action="Add" method="post">
         <input type="hidden" name="ProjectId" value="@Model.Id" />
         <div class="mb-3">
-            <textarea name="Content" class="form-control" rows="3"></textarea>
+            <textarea name="Content" class="form-control" rows="3" required></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Add Comment</button>
     </form>

@@ -12,28 +12,26 @@
     <div class="mb-3">
         <label asp-for="Project.Title" class="form-label"></label>
         <input asp-for="Project.Title" class="form-control" />
+        <span asp-validation-for="Project.Title" class="text-danger"></span>
     </div>
-
     <div class="mb-3">
         <label asp-for="Project.Description" class="form-label"></label>
         <textarea asp-for="Project.Description" class="form-control"></textarea>
+        <span asp-validation-for="Project.Description" class="text-danger"></span>
     </div>
-
     <div class="mb-3">
         <label asp-for="Project.Content" class="form-label"></label>
         <textarea asp-for="Project.Content" id="summernote" class="form-control">@Model.Project.Content</textarea>
+        <span asp-validation-for="Project.Content" class="text-danger"></span>
     </div>
-
     <div class="mb-3">
         <label asp-for="Project.TopicId" class="form-label">Topic</label>
         <select asp-for="Project.TopicId" asp-items="Model.Topics" class="form-select"></select>
     </div>
-
     <div class="mb-3">
         <label asp-for="Project.DifficultyLevelId" class="form-label">Difficulty</label>
         <select asp-for="Project.DifficultyLevelId" asp-items="Model.DifficultyLevels" class="form-select"></select>
     </div>
-
     <div class="mb-3">
         <label>Materials</label>
         @foreach (var material in Model.AllMaterials)

@@ -85,9 +85,14 @@
             &copy; 2025 - DIY Project Platform - <a href="https://github.com/mihaelsegulja">mihaelsegulja</a>
         </div>
     </footer>
+    <div id="dynamic-toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 999"></div>
+	@await Html.PartialAsync("_ToastPartial")
+	@await Html.PartialAsync("_SpinnerPartial")
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/toast.js" asp-append-version="true"></script>
+    <script src="~/js/spinner.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,5 +1,4 @@
-﻿using Core.Dtos;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebApp.ViewModels;
 

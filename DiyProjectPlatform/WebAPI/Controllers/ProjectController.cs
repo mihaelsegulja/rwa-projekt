@@ -23,12 +23,12 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAllProjects(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> GetAllProjects(ProjectFilterDto filter)
     {
         try
         {
             var userRole = ClaimsHelper.GetClaimValue(User, ClaimTypes.Role);
-            var projects = await _projectService.GetAllProjectsAsync(userRole, page, pageSize);
+            var projects = await _projectService.GetAllProjectsAsync(userRole, filter);
             return Ok(projects);
         }
         catch (Exception e)

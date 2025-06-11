@@ -8,4 +8,5 @@ public interface IMaterialService
     Task<MaterialDto?> GetMaterialByIdAsync(int id);
     Task<string> AddMaterialAsync(string material);
     Task<string?> UpdateMaterialAsync(MaterialDto materialDto);
+    Task<string?> DeleteMaterialAsync(int id);
 }

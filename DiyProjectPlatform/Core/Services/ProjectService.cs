@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.Enums;
+using Shared.Results;
 
 namespace Core.Services;
 
@@ -21,9 +22,9 @@ public class ProjectService : IProjectService
         _logService = logService;
     }
 
-    public async Task<IEnumerable<ProjectListDto>> GetAllProjectsAsync(string userRole, int page, int pageSize)
+    public async Task<PagedResult<ProjectListDto>> GetAllProjectsAsync(string userRole, ProjectFilterDto filter)
     {
-        var projects = await _dbContext.Projects
+        var query = _dbContext.Projects
             .Where(p => p.ProjectStatuses.Any(ps =>
                 userRole == nameof(Shared.Enums.UserRole.Admin)
                     ? ps.StatusTypeId != (int)Shared.Enums.ProjectStatusType.Deleted
@@ -32,11 +33,26 @@ public class ProjectService : IProjectService
             .Include(p => p.Topic)
             .Include(p => p.DifficultyLevel)
             .Include(p => p.ProjectImages).ThenInclude(pi => pi.Image)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+            query = query.Where(p => p.Title.Contains(filter.Search));
+
+        if (filter.TopicId.HasValue)
+            query = query.Where(p => p.TopicId == filter.TopicId);
+
+        if (filter.DifficultyLevelId.HasValue)
+            query = query.Where(p => p.DifficultyLevelId == filter.DifficultyLevelId);
+
+        var totalItems = await query.CountAsync();
+
+        var projects = await query
+            .OrderByDescending(p => p.DateCreated)
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
             .ToListAsync();
 
-        var result = projects.Select(p => new ProjectListDto
+        var items = projects.Select(p => new ProjectListDto
         {
             Id = p.Id,
             Title = p.Title,
@@ -46,22 +62,30 @@ public class ProjectService : IProjectService
             DifficultyLevel = p.DifficultyLevel.Name,
             Username = p.User.Username,
             MainImage = p.ProjectImages.FirstOrDefault(i => i.IsMainImage)?.Image.ImageData
-        });
+        }).ToList();
 
-        return result;
+        return new PagedResult<ProjectListDto>
+        {
+            Items = items,
+            TotalItems = totalItems,
+            Page = filter.Page,
+            PageSize = filter.PageSize
+        };
     }
 
     public async Task<ProjectDetailDto?> GetProjectByIdAsync(int id)
     {
         var project = await _dbContext.Projects
-       .Include(p => p.ProjectMaterials)
-           .ThenInclude(pm => pm.Material)
-       .Include(p => p.ProjectImages)
-           .ThenInclude(pi => pi.Image)
-       .Include(p => p.User)
-       .Include(p => p.Topic)
-       .Include(p => p.DifficultyLevel)
-       .FirstOrDefaultAsync(p => p.Id == id);
+            .Where(p => p.ProjectStatuses.Any(ps =>
+                ps.StatusTypeId != (int)Shared.Enums.ProjectStatusType.Deleted))
+           .Include(p => p.ProjectMaterials)
+               .ThenInclude(pm => pm.Material)
+           .Include(p => p.ProjectImages)
+               .ThenInclude(pi => pi.Image)
+           .Include(p => p.User)
+           .Include(p => p.Topic)
+           .Include(p => p.DifficultyLevel)
+           .FirstOrDefaultAsync(p => p.Id == id);
 
         if (project == null) return null;
 

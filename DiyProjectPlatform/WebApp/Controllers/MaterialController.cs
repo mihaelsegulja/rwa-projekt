@@ -3,11 +3,12 @@ using Core.Dtos;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Enums;
 using WebApp.ViewModels;
 
 namespace WebApp.Controllers;
 
-[Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
+[Authorize(Roles = nameof(UserRole.Admin))]
 public class MaterialController : Controller
 {
     private readonly IMaterialService _materialService;
@@ -49,7 +50,12 @@ public class MaterialController : Controller
 
         vm.Name = vm.Name.Trim();
         var dto = _mapper.Map<MaterialDto>(vm);
-        await _materialService.UpdateMaterialAsync(dto);
+        var result = await _materialService.UpdateMaterialAsync(dto);
+        if (result != null)
+            TempData["Success"] = result;
+        else
+            TempData["Error"] = "Update failed";
+
         return RedirectToAction("Index");
     }
 }

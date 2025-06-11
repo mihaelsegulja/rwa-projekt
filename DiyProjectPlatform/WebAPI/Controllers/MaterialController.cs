@@ -79,4 +79,18 @@ public class MaterialController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteMaterial(int id)
+    {
+        try
+        {
+            var result = await _materialService.DeleteMaterialAsync(id);
+            return result == null ? NotFound() : Ok(result);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
 }

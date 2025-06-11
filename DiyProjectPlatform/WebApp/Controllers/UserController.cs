@@ -37,8 +37,12 @@ public class UserController : Controller
 
         var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var userProfile = _mapper.Map<UserProfileDto>(profile);
-        var response = await _userService.UpdateUserProfileAsync(userId, userProfile);
-        TempData["Success"] = response;
+        var result = await _userService.UpdateUserProfileAsync(userId, userProfile);
+        if (result != null)
+            TempData["Success"] = result;
+        else
+            TempData["Error"] = "Update failed";
+
         return RedirectToAction("UpdateProfile");
     }
 
@@ -57,13 +61,12 @@ public class UserController : Controller
         var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var dto = _mapper.Map<ChangePasswordDto>(vm);
         var result = await _userService.ChangeUserPasswordAsync(userId, dto);
-        if (result != null)
-        {
-            ModelState.AddModelError(string.Empty, "Password change failed.");
-            return View();
-        }
 
-        TempData["Success"] = result ?? "Password changed.";
+        if (result != null)
+            TempData["Success"] = result;
+        else
+            TempData["Error"] = "Password change failed";
+
         return RedirectToAction("Index", "Home");
     }
 }

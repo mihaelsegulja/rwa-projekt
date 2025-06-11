@@ -79,4 +79,18 @@ public class TopicController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteTopic(int id)
+    {
+        try
+        {
+            var result = await _topicService.DeleteTopicAsync(id);
+            return result == null ? NotFound() : Ok(result);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
 }

@@ -8,4 +8,5 @@ public interface ITopicService
     Task<TopicDto?> GetTopicByIdAsync(int id);
     Task<string> AddTopicAsync(string name);
     Task<string?> UpdateTopicAsync(TopicDto topicDto);
+    Task<string?> DeleteTopicAsync(int id);
 }

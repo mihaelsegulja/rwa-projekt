@@ -34,8 +34,8 @@ public class ProjectStatusController : Controller
             DateModified = s.DateModified,
             ApproverUsername = s.ApproverUsername,
             SelectedStatusTypeId = s.StatusTypeId,
-            StatusTypeOptions = Enum.GetValues(typeof(Shared.Enums.ProjectStatusType))
-                .Cast<Shared.Enums.ProjectStatusType>()
+            StatusTypeOptions = Enum.GetValues(typeof(ProjectStatusType))
+                .Cast<ProjectStatusType>()
                 .Select(st => new SelectListItem
                 {
                     Text = st.ToString(),
@@ -61,7 +61,11 @@ public class ProjectStatusController : Controller
         };
 
         var result = await _projectService.UpdateProjectStatusAsync(dto);
-        TempData["Message"] = result ?? "Failed to update project status.";
+        if (result != null)
+            TempData["Success"] = result;
+        else
+            TempData["Error"] = "Failed to update project status.";
+
         return RedirectToAction("Index");
     }
 }

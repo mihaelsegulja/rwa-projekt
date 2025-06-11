@@ -59,4 +59,16 @@ public class MaterialService : IMaterialService
 
         return $"Material {material.Id} successfully updated";
     }
+
+    public async Task<string?> DeleteMaterialAsync(int id)
+    {
+        var material = await _dbContext.Materials.FindAsync(id);
+        if (material == null) return null;
+
+        _dbContext.Materials.Remove(material);
+        await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Material {id} deleted", LogLevel.Info);
+
+        return $"Material {id} successfully deleted";
+    }
 }
