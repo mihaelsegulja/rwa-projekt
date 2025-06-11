@@ -111,20 +111,38 @@
             });
         }
 
-        // On form submit: serialize image data
+        // Serialize image data
         document.querySelector("form").addEventListener("submit", function (e) {
-            // update descriptions
+            const anyChecked = document.querySelectorAll('input[name="SelectedMaterialIds"]:checked').length > 0;
+            if (!anyChecked) {
+                e.preventDefault();
+                showToast("Please select at least one material", "error");
+                return;
+            }
+
+            let isValid = true;
+            
             document.querySelectorAll(".description-input").forEach((input, i) => {
-                images[i].Description = input.value;
+                if (!input || !input.value) {
+                    isValid = false;
+                    return;
+                }
+                else {
+                    images[i].Description = input.value.trim();
+                }
             });
 
-            // set main image flag
+            if (!isValid) {
+                e.preventDefault();
+                showToast("Image descriptions are required", "error");
+                return;
+            }
+
             const radios = document.querySelectorAll(".main-image-radio");
             radios.forEach((radio, i) => {
                 images[i].IsMainImage = radio.checked;
             });
 
-            // set hidden input value
             document.getElementById("ImagesJson").value = JSON.stringify(images);
         });
     </script>
