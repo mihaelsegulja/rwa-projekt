@@ -1,9 +1,3 @@
--- CREATE DATABASE dbDiyProjectPlatform
--- GO
-
--- USE dbDiyProjectPlatform
--- GO
-
 CREATE TABLE [UserRole] (
 	[Id] int PRIMARY KEY,
 	[Name] nvarchar(50) NOT NULL
