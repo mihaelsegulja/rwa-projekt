@@ -1,48 +1,35 @@
 ﻿@using WebApp.ViewModels
-@model List<ProjectStatusApprovalVm>
+@model ProjectStatusFilterVm
 @{
     ViewData["Title"] = "Approve Project Statuses";
 }
 
 <h2>Approve Project Statuses</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th colspan="2">Project</th>
-            <th>Author</th>
-            <th>Current Status</th>
-            <th>Approver</th>
-            <th>Modified</th>
-            <th>Update</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.ProjectTitle</td>
-                <td>
-                    <a asp-controller="Project" asp-action="Details" asp-route-id="@item.ProjectId" class="btn btn-outline-primary btn-sm">View</a>
-                </td>
-                <td>@item.AuthorUsername</td>
-                <td>@item.StatusTypeName</td>
-                <td>@(string.IsNullOrEmpty(item.ApproverUsername) ? "—" : item.ApproverUsername)</td>
-                <td>@item.DateModified.ToString("g")</td>
-                <td>
-                    <form asp-action="Update" method="post" class="d-flex">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <input type="hidden" name="projectId" value="@item.ProjectId" />
-                        <select name="selectedStatusTypeId" class="form-select me-2">
-                            @foreach (var opt in item.StatusTypeOptions)
-                            {
-                                <option value="@opt.Value" selected="@(opt.Value == item.StatusTypeId.ToString())">@opt.Text</option>
-                            }
-                        </select>
-                        <button class="btn btn-success btn-sm">Update</button>
-                    </form>
-                </td>
-            </tr>
+<div id="projectStatuses">
+    @await Html.PartialAsync("_ProjectStatusListPartial", Model)
+</div>
+
+@section Scripts {
+    <script>
+        function fetchStatuses(page = 1) {
+            showSpinner();
+
+            $.get("/ProjectStatus/Search", {
+                page: page
+            }).done(function (data) {
+                $('#projectStatuses').html(data);
+            }).fail(function () {
+                showToast("Failed to load status list", "error");
+            }).always(function () {
+                hideSpinner();
+            });
         }
-    </tbody>
-</table>
+
+        $(document).on('click', '.pagination a.page-link', function (e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            fetchStatuses(page);
+        });
+    </script>
+}

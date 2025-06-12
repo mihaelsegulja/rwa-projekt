@@ -26,6 +26,9 @@ public class UserController : ControllerBase
     {
         try
         {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid input");
+
             var result = await _userService.UserRegisterAsync(registerDto);
             return Ok(result);
         }
@@ -44,6 +47,9 @@ public class UserController : ControllerBase
     {
         try
         {
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid input");
+
             var token = await _userService.UserLoginAsync(loginDto);
             return token == null ? Unauthorized("Incorrect username or password") : Ok(token);
         }

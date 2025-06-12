@@ -45,7 +45,7 @@
 @{
     int totalPages = (int)Math.Ceiling(Model.TotalItems / (double)Model.PageSize);
 }
-<nav id="pagination-container">
+<nav id="pagination-container" class="mt-4">
     <ul class="pagination justify-content-center mt-4">
         <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
             <a class="page-link" href="#" data-page="@(Model.Page - 1)">Previous</a>

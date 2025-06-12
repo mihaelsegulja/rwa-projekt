@@ -20,30 +20,69 @@ public class ProjectStatusController : Controller
         _projectService = projectService;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
     {
-        var statuses = await _projectService.GetAllProjectStatusesAsync(1, 100);
+        var result = await _projectService.GetAllProjectStatusesAsync(page, pageSize);
 
-        var vm = statuses.Select(s => new ProjectStatusApprovalVm
+        var vm = new ProjectStatusFilterVm
         {
-            Id = s.Id,
-            ProjectId = s.ProjectId,
-            ProjectTitle = s.ProjectTitle,
-            AuthorUsername = s.AuthorUsername,
-            StatusTypeId = s.StatusTypeId,
-            DateModified = s.DateModified,
-            ApproverUsername = s.ApproverUsername,
-            SelectedStatusTypeId = s.StatusTypeId,
+            Page = result.Page,
+            PageSize = result.PageSize,
+            TotalItems = result.TotalItems,
             StatusTypeOptions = Enum.GetValues(typeof(ProjectStatusType))
-                .Cast<ProjectStatusType>()
-                .Select(st => new SelectListItem
-                {
-                    Text = st.ToString(),
-                    Value = ((int)st).ToString()
-                }).ToList()
-        }).ToList();
+            .Cast<ProjectStatusType>()
+            .Select(st => new SelectListItem
+            {
+                Text = st.ToString(),
+                Value = ((int)st).ToString()
+            }).ToList(),
+
+            Statuses = result.Items.Select(s => new ProjectStatusListVm
+            {
+                Id = s.Id,
+                ProjectId = s.ProjectId,
+                ProjectTitle = s.ProjectTitle,
+                AuthorUsername = s.AuthorUsername,
+                StatusTypeId = s.StatusTypeId,
+                DateModified = s.DateModified,
+                ApproverUsername = s.ApproverUsername,
+                SelectedStatusTypeId = s.StatusTypeId
+            }).ToList()
+        };
 
         return View(vm);
+    }
+    public async Task<IActionResult> Search(int page = 1, int pageSize = 10)
+    {
+        var result = await _projectService.GetAllProjectStatusesAsync(page, pageSize);
+
+        var vm = new ProjectStatusFilterVm
+        {
+            Page = result.Page,
+            PageSize = result.PageSize,
+            TotalItems = result.TotalItems,
+            StatusTypeOptions = Enum.GetValues(typeof(ProjectStatusType))
+            .Cast<ProjectStatusType>()
+            .Select(st => new SelectListItem
+            {
+                Text = st.ToString(),
+                Value = ((int)st).ToString()
+            }).ToList(),
+
+            Statuses = result.Items.Select(s => new ProjectStatusListVm
+            {
+                Id = s.Id,
+                ProjectId = s.ProjectId,
+                ProjectTitle = s.ProjectTitle,
+                AuthorUsername = s.AuthorUsername,
+                StatusTypeId = s.StatusTypeId,
+                DateModified = s.DateModified,
+                ApproverUsername = s.ApproverUsername,
+                SelectedStatusTypeId = s.StatusTypeId
+            }).ToList()
+        };
+
+        return PartialView("_ProjectStatusListPartial", vm);
     }
 
     [HttpPost]

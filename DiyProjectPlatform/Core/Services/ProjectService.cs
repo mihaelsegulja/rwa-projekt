@@ -111,28 +111,39 @@ public class ProjectService : IProjectService
         return dto;
     }
 
-    public async Task<IEnumerable<ProjectStatusListDto>> GetAllProjectStatusesAsync(int page, int pageSize)
+    public async Task<PagedResult<ProjectStatusListDto>> GetAllProjectStatusesAsync(int page, int pageSize)
     {
-        var statuses = await _dbContext.ProjectStatuses
+        var query = _dbContext.ProjectStatuses
             .Include(s => s.Project)
                 .ThenInclude(p => p.User)
-            .Include(s => s.Approver)
+            .Include(s => s.Approver);
+
+        var totalItems = await query.CountAsync();
+
+        var statuses = await query
+            .OrderByDescending(s => s.DateModified)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        var result = statuses.Select(s => new ProjectStatusListDto
+        var items = statuses.Select(s => new ProjectStatusListDto
         {
             Id = s.Id,
             ProjectId = s.ProjectId,
             ProjectTitle = s.Project.Title,
             StatusTypeId = s.StatusTypeId,
-            ApproverUsername = s.Approver != null ? s.Approver.Username : string.Empty,
+            ApproverUsername = s.Approver?.Username ?? string.Empty,
             AuthorUsername = s.Project.User.Username,
             DateModified = s.DateModified
-        });
+        }).ToList();
 
-        return result;
+        return new PagedResult<ProjectStatusListDto>
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = totalItems
+        };
     }
 
     public async Task<string> AddProjectAsync(ProjectCreateDto projectCreateDto, int currentUserId)

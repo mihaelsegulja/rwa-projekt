@@ -33,7 +33,6 @@ public class ProjectController : Controller
     public async Task<IActionResult> Index(ProjectFilterVm filter)
     {
         var userRole = ClaimsHelper.GetClaimValue(User, ClaimTypes.Role);
-
         var dto = _mapper.Map<ProjectFilterDto>(filter);
         var result = await _projectService.GetAllProjectsAsync(userRole, dto);
 
@@ -83,7 +82,7 @@ public class ProjectController : Controller
         var topics = await _topicService.GetAllTopicsAsync();
         vm.Topics = topics.Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList();
 
-        vm.DifficultyLevels = Enum.GetValues<Shared.Enums.DifficultyLevel>().Select(dl => new SelectListItem
+        vm.DifficultyLevels = Enum.GetValues<DifficultyLevel>().Select(dl => new SelectListItem
         {
             Value = ((int)dl).ToString(),
             Text = dl.ToString()
