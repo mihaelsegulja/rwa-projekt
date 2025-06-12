@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = $"Error {ViewBag.StatusCode}";
+    var code = (int)ViewBag.StatusCode;
+}
+
+<h1 class="display-4">Error @code</h1>
+<p class="lead text-danger">
+    @switch (code)
+    {
+        case 400:
+            @:Bad request. Please check your input and try again.
+			break;
+        case 401:
+            @:Unauthorized access.
+			break;
+        case 403:
+            @:Access denied.
+            break;
+        case 404:
+            @:The page could not be found.
+            break;
+        case 500:
+            @:Internal server error.
+            break;
+        default:
+            @:An unknown error occurred.
+            break;
+    }
+</p>
+<p>WOMP WOMP :(</p>
+<a asp-action="Index" asp-controller="Home" class="btn btn-outline-primary">Return to Home</a>
