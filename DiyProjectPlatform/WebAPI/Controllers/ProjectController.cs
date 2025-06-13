@@ -23,7 +23,7 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAllProjects(ProjectFilterDto filter)
+    public async Task<IActionResult> GetAllProjects([FromQuery]ProjectFilterDto filter)
     {
         try
         {

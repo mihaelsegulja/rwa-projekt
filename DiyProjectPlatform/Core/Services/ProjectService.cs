@@ -25,14 +25,14 @@ public class ProjectService : IProjectService
     public async Task<PagedResult<ProjectListDto>> GetAllProjectsAsync(string userRole, ProjectFilterDto filter)
     {
         var query = _dbContext.Projects
+            .AsNoTracking()
             .Where(p => p.ProjectStatuses.Any(ps =>
                 userRole == nameof(Shared.Enums.UserRole.Admin)
                     ? ps.StatusTypeId != (int)Shared.Enums.ProjectStatusType.Deleted
                     : ps.StatusTypeId == (int)Shared.Enums.ProjectStatusType.Approved))
             .Include(p => p.User)
             .Include(p => p.Topic)
-            .Include(p => p.DifficultyLevel)
-            .Include(p => p.ProjectImages).ThenInclude(pi => pi.Image)
+            //.Include(p => p.ProjectImages).ThenInclude(pi => pi.Image)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
@@ -46,23 +46,24 @@ public class ProjectService : IProjectService
 
         var totalItems = await query.CountAsync();
 
-        var projects = await query
+        var items = await query
             .OrderByDescending(p => p.DateCreated)
             .Skip((filter.Page - 1) * filter.PageSize)
             .Take(filter.PageSize)
-            .ToListAsync();
-
-        var items = projects.Select(p => new ProjectListDto
-        {
-            Id = p.Id,
-            Title = p.Title,
-            Description = p.Description,
-            DateCreated = p.DateCreated,
-            TopicName = p.Topic.Name,
-            DifficultyLevel = p.DifficultyLevel.Name,
-            Username = p.User.Username,
-            MainImage = p.ProjectImages.FirstOrDefault(i => i.IsMainImage)?.Image.ImageData
-        }).ToList();
+            .Select(p => new ProjectListDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                DateCreated = p.DateCreated,
+                TopicName = p.Topic.Name,
+                DifficultyLevel =((Shared.Enums.DifficultyLevel)p.DifficultyLevelId).ToString(),
+                Username = p.User.Username,
+                MainImageId = p.ProjectImages
+                    .Where(i => i.IsMainImage)
+                    .Select(i => i.ImageId)
+                    .FirstOrDefault()
+            }).ToListAsync();
 
         return new PagedResult<ProjectListDto>
         {

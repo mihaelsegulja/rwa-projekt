@@ -9,5 +9,5 @@ public class ProjectListDto
     public string TopicName { get; set; }
     public string DifficultyLevel { get; set; }
     public string Username { get; set; }
-    public string? MainImage { get; set; }
+    public int? MainImageId { get; set; }
 }

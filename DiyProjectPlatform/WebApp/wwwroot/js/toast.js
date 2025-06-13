@@ -1,6 +1,6 @@
 ﻿$(function () {
-    const toastElList = $('.toast');
-    toastElList.each(function () {
+    const toastList = $('.toast');
+    toastList.each(function () {
         const t = new bootstrap.Toast(this, { delay: 3000 });
         t.show();
     });

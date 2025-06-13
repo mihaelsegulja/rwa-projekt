@@ -74,6 +74,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
 builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddAutoMapper(
     typeof(CoreMappingProfile)
