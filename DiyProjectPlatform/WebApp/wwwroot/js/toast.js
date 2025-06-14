@@ -1,4 +1,5 @@
-﻿$(function () {
+﻿// For TempData messages
+$(function () {
     const toastList = $('.toast');
     toastList.each(function () {
         const t = new bootstrap.Toast(this, { delay: 3000 });
@@ -6,7 +7,8 @@
     });
 });
 
-function showToast(message, type = "info", delay = 3000) {
+// For dynamic messages
+function showToast (message, type = "info", delay = 3000) {
     const bgClass = {
         success: "bg-success text-white",
         error: "bg-danger text-white",
@@ -15,7 +17,6 @@ function showToast(message, type = "info", delay = 3000) {
     }[type] || "bg-secondary text-white";
 
     const toastId = `toast-${Date.now()}`;
-
     const toastHtml = `
         <div id="${toastId}" class="toast align-items-center ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -25,17 +26,17 @@ function showToast(message, type = "info", delay = 3000) {
         </div>
     `;
 
-    const container = document.getElementById("dynamic-toast-container");
-    if (!container) {
+    const container = $("#dynamic-toast-container");
+    if (!container.length) {
         console.error("Toast container not found.");
         return;
     }
 
-    container.insertAdjacentHTML("beforeend", toastHtml);
+    container.append(toastHtml);
 
-    const toastEl = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastEl, { delay });
-    toast.show();
+    const $toast = $(`#${toastId}`);
+    const toastInstance = new bootstrap.Toast($toast[0], { delay });
+    toastInstance.show();
 
-    toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
-}
+    $toast.on("hidden.bs.toast", () => $toast.remove());
+};

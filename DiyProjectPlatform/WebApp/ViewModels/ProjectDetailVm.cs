@@ -12,7 +12,7 @@ public class ProjectDetailVm
     public DateTime DateCreated { get; set; }
     public DateTime DateModified { get; set; }
     public List<string> MaterialNames { get; set; } = new();
-    public List<ImageVm> Images { get; set; } = new();
+    public List<ImageShortVm> Images { get; set; } = new();
 
     public List<CommentVm> Comments { get; set; } = new();
 }

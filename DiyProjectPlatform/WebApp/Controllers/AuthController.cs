@@ -8,11 +8,13 @@ namespace WebApp.Controllers;
 
 public class AuthController : Controller
 {
+    private readonly string backendBaseUrl = "http://localhost:5069";
+
     [HttpGet]
     public IActionResult Login(string? returnUrl)
     {
         var encoded = Uri.EscapeDataString(returnUrl ?? "/");
-        var staticLoginUrl = $"http://localhost:5069/login.html?returnUrl={encoded}";
+        var staticLoginUrl = $"{backendBaseUrl}/login.html?returnUrl={encoded}";
         return Redirect(staticLoginUrl);
     }
 
@@ -53,7 +55,16 @@ public class AuthController : Controller
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-        return Redirect(returnUrl ?? "/");
+        string redirectTarget;
+
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+            redirectTarget = returnUrl;
+        else if (role == Shared.Enums.UserRole.Admin.ToString())
+            redirectTarget = $"{backendBaseUrl}/logs.html";
+        else
+            redirectTarget = "/Project";
+
+        return Redirect(redirectTarget ?? "/");
     }
 
     [HttpGet]

@@ -32,7 +32,6 @@ public class ProjectService : IProjectService
                     : ps.StatusTypeId == (int)Shared.Enums.ProjectStatusType.Approved))
             .Include(p => p.User)
             .Include(p => p.Topic)
-            //.Include(p => p.ProjectImages).ThenInclude(pi => pi.Image)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter.Search))
@@ -82,13 +81,18 @@ public class ProjectService : IProjectService
            .Include(p => p.ProjectMaterials)
                .ThenInclude(pm => pm.Material)
            .Include(p => p.ProjectImages)
-               .ThenInclude(pi => pi.Image)
            .Include(p => p.User)
            .Include(p => p.Topic)
-           .Include(p => p.DifficultyLevel)
            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (project == null) return null;
+
+        var imageIds = project.ProjectImages.Select(pi => pi.ImageId).ToList();
+
+        var imageDescriptions = await _dbContext.Images
+            .Where(i => imageIds.Contains(i.Id))
+            .Select(i => new { i.Id, i.Description })
+            .ToListAsync();
 
         var dto = new ProjectDetailDto
         {
@@ -98,15 +102,14 @@ public class ProjectService : IProjectService
                 Id = pm.MaterialId,
                 Name = pm.Material.Name
             }).ToList(),
-            Images = project.ProjectImages.Select(pi => new ImageDto
+            Images = imageIds.Select(id => new ImageShortDto
             {
-                ImageData = pi.Image.ImageData,
-                Description = pi.Image.Description,
-                IsMainImage = pi.IsMainImage
+                Id = id,
+                Description = imageDescriptions.FirstOrDefault(i => i.Id == id)?.Description ?? string.Empty
             }).ToList(),
             Username = project.User.Username,
             TopicName = project.Topic.Name,
-            DifficultyLevelName = project.DifficultyLevel.Name
+            DifficultyLevelName = ((Shared.Enums.DifficultyLevel)project.DifficultyLevelId).ToString()
         };
 
         return dto;

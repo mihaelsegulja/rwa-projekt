@@ -26,6 +26,7 @@ public class WebAppMappingProfile : Profile
             .ForMember(dest => dest.MaterialNames, opt => opt.MapFrom(src => src.Materials.Select(m => m.Name)))
             .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images));
         CreateMap<ImageDto, ImageVm>();
+        CreateMap<ImageShortDto, ImageShortVm>();
         CreateMap<CommentUpdateDto, CommentUpdateVm>().ReverseMap();
         CreateMap<MaterialDto, MaterialVm>().ReverseMap();
         CreateMap<TopicDto, TopicVm>().ReverseMap();

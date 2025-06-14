@@ -12,7 +12,7 @@ public class ImageController : Controller
         _imageService = imageService;
     }
 
-    [HttpGet("Image/Project/{id}")]
+    [HttpGet("Image/{id}")]
     [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
     public async Task<IActionResult> ProjectImage(int id)
     {
