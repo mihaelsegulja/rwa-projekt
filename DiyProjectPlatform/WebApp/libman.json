@@ -3,7 +3,6 @@
   "defaultProvider": "cdnjs",
   "libraries": [
     {
-      "provider": "cdnjs",
       "library": "bootstrap-icons@1.11.3",
       "destination": "wwwroot/assets/bootstrap-icons/",
       "files": [
@@ -13,7 +12,6 @@
       ]
     },
     {
-      "provider": "cdnjs",
       "library": "summernote@0.9.1",
       "destination": "wwwroot/lib/summernote/",
       "files": [
@@ -23,6 +21,19 @@
         "font/summernote.ttf",
         "font/summernote.woff",
         "font/summernote.woff2"
+      ]
+    },
+    {
+      "provider": "unpkg",
+      "library": "@fancyapps/ui@6.0.0",
+      "destination": "wwwroot/lib/fancyapps/ui/",
+      "files": [
+        "dist/fancybox/fancybox.compactmode.css",
+        "dist/fancybox/fancybox.compactmode.js",
+        "dist/fancybox/fancybox.compactmode.umd.js",
+        "dist/fancybox/fancybox.css",
+        "dist/fancybox/fancybox.js",
+        "dist/fancybox/fancybox.umd.js"
       ]
     }
   ]

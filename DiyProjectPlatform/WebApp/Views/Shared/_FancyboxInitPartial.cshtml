@@ -1,0 +1,22 @@
+﻿<link rel="stylesheet" href="~/lib/fancyapps/ui/dist/fancybox/fancybox.css" />
+<script src="~/lib/fancyapps/ui/dist/fancybox/fancybox.umd.js"></script>
+<script>
+    Fancybox.bind('[data-fancybox="gallery"]', {
+        Toolbar: {
+            display: [
+                { id: "counter", position: "center" },
+                "zoom",
+                "slideshow",
+                "fullscreen",
+                "thumbs",
+                "close"
+            ]
+        },
+        Thumbs: {
+            autoStart: false
+        },
+        animated: true,
+        showClass: "fancybox-zoomIn",
+        hideClass: "fancybox-zoomOut"
+    });
+</script>

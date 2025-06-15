@@ -30,20 +30,25 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> UpdateProfile(UserProfileVm profile)
+    public async Task<IActionResult> UpdateProfile([FromForm] UserProfileVm profile)
     {
         if (!ModelState.IsValid)
-            return View(profile);
+        {
+            var errors = ModelState.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value?.Errors.FirstOrDefault()?.ErrorMessage
+            );
+            return BadRequest(errors);
+        }
 
         var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-        var userProfile = _mapper.Map<UserProfileDto>(profile);
-        var result = await _userService.UpdateUserProfileAsync(userId, userProfile);
-        if (result != null)
-            TempData["Success"] = result;
-        else
-            TempData["Error"] = "Update failed";
+        var dto = _mapper.Map<UserProfileDto>(profile);
+        var result = await _userService.UpdateUserProfileAsync(userId, dto);
 
-        return RedirectToAction("UpdateProfile");
+        if (result == null)
+            return BadRequest(new { General = "Update failed" });
+
+        return Ok("Profile updated successfully.");
     }
 
     [HttpGet]
@@ -53,20 +58,24 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> ChangePassword(ChangePasswordVm vm)
+    public async Task<IActionResult> ChangePassword([FromForm] ChangePasswordVm vm)
     {
         if (!ModelState.IsValid)
-            return View(vm);
+        {
+            var errors = ModelState.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value?.Errors.FirstOrDefault()?.ErrorMessage
+            );
+            return BadRequest(errors);
+        }
 
         var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var dto = _mapper.Map<ChangePasswordDto>(vm);
         var result = await _userService.ChangeUserPasswordAsync(userId, dto);
 
-        if (result != null)
-            TempData["Success"] = result;
-        else
-            TempData["Error"] = "Password change failed";
+        if (result == null)
+            return BadRequest(new { General = "Password change failed" });
 
-        return RedirectToAction("Index", "Home");
+        return Ok("Password successfully changed.");
     }
 }

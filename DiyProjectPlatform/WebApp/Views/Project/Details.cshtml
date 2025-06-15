@@ -49,16 +49,15 @@
             {
                 var img = Model.Images[i];
                 <div class="carousel-item @(i == 0 ? "active" : "")">
-                    <img src="/Image/@img.Id" 
-                        class="d-block w-100" alt="Project Image" 
-                        style="max-height: 500px; object-fit: contain;"
-                        loading="lazy">
-                    @if (!string.IsNullOrEmpty(img.Description))
-                    {
-                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded">
-                            <p>@img.Description</p>
-                        </div>
-                    }
+                    <a data-fancybox="gallery"
+                       href="/Image/@img.Id"
+                       data-caption="@img.Description">
+                        <img src="/Image/@img.Id"
+                             class="d-block w-100"
+                             alt="Project Image"
+                             style="max-height: 500px; object-fit: contain; cursor: zoom-in;"
+                             loading="lazy">
+                    </a>
                 </div>
             }
         </div>
@@ -77,6 +76,21 @@
 
 <h4>Comments</h4>
 <hr/>
+
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    <div class="mb-4">
+        <form asp-controller="Comment" asp-action="Add" method="post">
+            <input type="hidden" name="ProjectId" value="@Model.Id" />
+            <div class="mb-3">
+                <textarea name="Content" class="form-control" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Comment</button>
+        </form>
+    </div>
+}
+<hr />
+
 @if (Model.Comments.Any())
 {
     <ul class="list-group mb-4">
@@ -88,17 +102,24 @@
 
                     @if (User.IsInRole("Admin") || User.Identity?.Name == comment.Username)
                     {
-                        <form asp-controller="Comment" asp-action="Update" method="post" class="mb-2">
-                            <input type="hidden" name="Id" value="@comment.Id" />
-                            <input type="hidden" name="ProjectId" value="@Model.Id" />
-                            <textarea name="Content" class="form-control mb-1" required>@comment.Content</textarea>
-                            <button type="submit" class="btn btn-sm btn-outline-secondary">Update</button>
-                        </form>
-                        <form asp-controller="Comment" asp-action="Delete" method="post">
-                            <input type="hidden" name="id" value="@comment.Id" />
-                            <input type="hidden" name="projectId" value="@Model.Id" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                        </form>
+                        <div class="mb-0">
+                            <form asp-controller="Comment" asp-action="Update" method="post">
+                                <input type="hidden" name="Id" value="@comment.Id" />
+                                <input type="hidden" name="ProjectId" value="@Model.Id" />
+                                <div class="mb-2">
+                                    <textarea name="Content" class="form-control" rows="2" required>@comment.Content</textarea>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Update</button>
+                                </div>
+                            </form>
+
+                            <form asp-controller="Comment" asp-action="Delete" method="post" class="mt-2">
+                                <input type="hidden" name="id" value="@comment.Id" />
+                                <input type="hidden" name="projectId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
                     }
                     else
                     {
@@ -114,13 +135,13 @@ else
     <p class="text-muted">No comments yet.</p>
 }
 
-@if (User.Identity?.IsAuthenticated ?? false)
-{
-    <form asp-controller="Comment" asp-action="Add" method="post">
-        <input type="hidden" name="ProjectId" value="@Model.Id" />
-        <div class="mb-3">
-            <textarea name="Content" class="form-control" rows="3" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Comment</button>
-    </form>
+<!-- Back to project list navigation -->
+<a href="@Url.Action("Index", "Project")"
+   class="btn btn-secondary position-fixed d-none d-md-inline-block"
+   style="bottom: 20px; right: 20px; z-index: 800;">
+    <i class="bi bi-arrow-left"></i> Back to project list
+</a>
+
+@section Scripts {
+    @await Html.PartialAsync("_FancyboxInitPartial");
 }

@@ -6,9 +6,11 @@ namespace WebApp.ViewModels;
 public class UserProfileVm
 {
     [Required(ErrorMessage = "Firstname is required.")]
+    [Display(Name = "First Name")]
     public string FirstName { get; set; }
 
     [Required(ErrorMessage = "Lastname is required.")]
+    [Display(Name = "Last Name")]
     public string LastName { get; set; }
 
     [Required(ErrorMessage = "Username is required.")]
