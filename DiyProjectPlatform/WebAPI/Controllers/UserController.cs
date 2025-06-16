@@ -104,22 +104,6 @@ public class UserController : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
-    
-    [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
-    [HttpDelete("delete")]
-    public async Task<IActionResult> DeleteUser(int id)
-    {
-        try
-        {
-            var adminId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-            var result = await _userService.DeleteUserAsync(adminId, id);
-            return result == null ? NotFound("User not found") : Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
-    }
 
     [Authorize]
     [HttpPut("change-password")]
@@ -129,6 +113,22 @@ public class UserController : ControllerBase
         {
             var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
             var result = await _userService.ChangeUserPasswordAsync(userId, changePasswordDto);
+            return result == null ? NotFound("User not found") : Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        try
+        {
+            var adminId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            var result = await _userService.DeleteUserAsync(adminId, id);
             return result == null ? NotFound("User not found") : Ok(result);
         }
         catch (Exception ex)

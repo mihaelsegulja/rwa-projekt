@@ -236,21 +236,17 @@ public class ProjectService : IProjectService
             return "You do not have permission to update this project";
         }
 
-        // Update core project info
         _mapper.Map(projectUpdateDto.Project, project);
         project.DateModified = DateTime.UtcNow;
 
-        // Replace materials
         var existingMaterialIds = project.ProjectMaterials.Select(pm => pm.MaterialId).ToList();
         var newMaterialIds = projectUpdateDto.MaterialIds;
 
-        // Remove old materials
         var materialsToRemove = project.ProjectMaterials
             .Where(pm => !newMaterialIds.Contains(pm.MaterialId))
             .ToList();
         _dbContext.ProjectMaterials.RemoveRange(materialsToRemove);
 
-        // Add new materials
         var materialsToAdd = newMaterialIds
             .Where(id => !existingMaterialIds.Contains(id))
             .Select(id => new ProjectMaterial

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Core.Dtos;
 using Core.Interfaces;
+using Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -19,15 +20,17 @@ public class ProjectController : Controller
     private readonly ITopicService _topicService;
     private readonly IMaterialService _materialService;
     private readonly ICommentService _commentService;
+    private readonly IImageService _imageService;
     private readonly IMapper _mapper;
 
-    public ProjectController(IProjectService projectService, IMapper mapper, ITopicService topicService, IMaterialService materialService, ICommentService commentService)
+    public ProjectController(IProjectService projectService, IMapper mapper, ITopicService topicService, IMaterialService materialService, ICommentService commentService, IImageService imageService)
     {
         _projectService = projectService;
         _mapper = mapper;
         _topicService = topicService;
         _materialService = materialService;
         _commentService = commentService;
+        _imageService = imageService;
     }
 
     public async Task<IActionResult> Index(ProjectFilterVm filter)
@@ -205,7 +208,7 @@ public class ProjectController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(ProjectEditVm vm)
+    public async Task<IActionResult> Edit(ProjectEditVm vm, string imagesJson)
     {
         if (!ModelState.IsValid)
         {
@@ -232,6 +235,14 @@ public class ProjectController : Controller
         var result = await _projectService.UpdateProjectAsync(updateDto, currentUserId);
         if (result == null)
             return NotFound();
+
+        var images = JsonSerializer.Deserialize<List<ImageDto>>(imagesJson);
+
+        if (images != null && images.Count > 0)
+        {
+            await _imageService.DeleteImagesByProjectIdAsync(vm.Project.Id);
+            await _imageService.AddImagesToProjectAsync(vm.Project.Id, images);
+        }
 
         TempData["Success"] = result;
         return RedirectToAction("Index");

@@ -96,22 +96,6 @@ public class UserService : IUserService
         return "Profile updated";
     }
 
-    public async Task<string?> DeleteUserAsync(int adminId, int userId)
-    {
-        if (adminId == userId)
-            throw new InvalidOperationException("You cannot delete your own account");
-
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return null;
-
-        user.IsActive = false;
-        user.DateDeleted = DateTime.UtcNow;
-        await _dbContext.SaveChangesAsync();
-        await _logService.AddLogAsync($"Admin {adminId} deleted user {userId}", LogLevel.Info);
-
-        return "User has been deleted";
-    }
-
     public async Task<string?> ChangeUserPasswordAsync(int userId, ChangePasswordDto changePasswordDto)
     {
         var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -129,5 +113,21 @@ public class UserService : IUserService
         await _logService.AddLogAsync($"Password changed for user {userId}", LogLevel.Info);
 
         return "Password changed successfully";
+    }
+
+    public async Task<string?> DeleteUserAsync(int adminId, int userId)
+    {
+        if (adminId == userId)
+            throw new InvalidOperationException("You cannot delete your own account");
+
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) return null;
+
+        user.IsActive = false;
+        user.DateDeleted = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Admin {adminId} deleted user {userId}", LogLevel.Info);
+
+        return "User has been deleted";
     }
 }

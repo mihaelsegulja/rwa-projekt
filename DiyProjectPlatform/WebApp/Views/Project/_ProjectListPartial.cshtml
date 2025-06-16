@@ -21,7 +21,7 @@
 
                     <div class="mt-3">
                         <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-primary mb-1"><i class="bi bi-eye-fill"></i> View</a>
-                    @if (User.IsInRole(nameof(Shared.Enums.UserRole.Admin)) || User.Identity?.Name == project.Author)
+                        @if (User.IsInRole(nameof(Shared.Enums.UserRole.Admin)) || User.Identity?.Name == project.Author)
                         {
                             <a asp-action="Edit" asp-route-id="@project.Id" class="btn btn-secondary mb-1"><i class="bi bi-pencil-square"></i> Edit</a>
                         }

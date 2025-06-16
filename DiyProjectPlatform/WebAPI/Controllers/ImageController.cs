@@ -36,5 +36,24 @@ namespace WebAPI.Controllers
                 return StatusCode(500, e.Message);
             }
         }
+
+        [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteImage(int id)
+        {
+            try
+            {
+                var result = await _imageService.DeleteImageAsync(id);
+                return Ok(result);
+            }
+            catch (InvalidOperationException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
     }
 }
