@@ -20,8 +20,9 @@
     <span class="badge bg-secondary me-1">@name</span>
 }
 <hr />
-
-<p>@Html.Raw(Model.Content)</p>
+<div class="my-5">
+    <p>@Html.Raw(Model.Content)</p>
+</div>
 <hr />
 
 @if (Model.Images.Any())

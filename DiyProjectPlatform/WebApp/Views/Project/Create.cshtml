@@ -14,7 +14,7 @@
     </div>
     <div class="mb-3">
         <label asp-for="Project.Description" class="form-label"></label>
-        <textarea asp-for="Project.Description" class="form-control"></textarea>
+        <textarea asp-for="Project.Description" class="form-control" rows="3"></textarea>
         <span asp-validation-for="Project.Description" class="text-danger"></span>
     </div>
     <div class="mb-3">
@@ -53,8 +53,10 @@
     <div id="imagePreviewList"></div>
     <input type="hidden" name="ImagesJson" id="ImagesJson" />
 
-    <button type="submit" class="btn btn-primary">Create</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <div class="my-4">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
 </form>
 
 @section Scripts {

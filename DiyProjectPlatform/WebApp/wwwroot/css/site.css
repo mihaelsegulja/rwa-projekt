@@ -20,3 +20,8 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+hr {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}

@@ -28,9 +28,6 @@
       "library": "@fancyapps/ui@6.0.0",
       "destination": "wwwroot/lib/fancyapps/ui/",
       "files": [
-        "dist/fancybox/fancybox.compactmode.css",
-        "dist/fancybox/fancybox.compactmode.js",
-        "dist/fancybox/fancybox.compactmode.umd.js",
         "dist/fancybox/fancybox.css",
         "dist/fancybox/fancybox.js",
         "dist/fancybox/fancybox.umd.js"

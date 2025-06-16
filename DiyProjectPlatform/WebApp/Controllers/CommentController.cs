@@ -26,6 +26,7 @@ public class CommentController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "Invalid comment";
             return RedirectToAction("Details", "Project", new { id = dto.ProjectId });
         }
 
