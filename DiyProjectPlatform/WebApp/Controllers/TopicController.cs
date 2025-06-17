@@ -35,7 +35,12 @@ public class TopicController : Controller
             return View("Index", _mapper.Map<List<TopicVm>>(topics));
         }
 
-        await _topicService.AddTopicAsync(vm.Name.Trim());
+        var result = await _topicService.AddTopicAsync(vm.Name.Trim());
+        if (result != null)
+            TempData["Success"] = result;
+        else
+            TempData["Error"] = "Failed to add new topic";
+
         return RedirectToAction("Index");
     }
 

@@ -52,11 +52,17 @@
 
     <div id="imageUploads">
         <label class="form-label">Images</label>
+        <div class="alert alert-warning d-flex align-items-center mb-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <p>
+                Uploading new images will <strong>delete all existing project images</strong> and replace them with the ones you select below.
+                <strong>If you want to keep existing images, then do not upload any new images</strong> and save the project.
+            </p>
+        </div>
         <div class="mb-2">
             <input type="file" class="form-control" id="imageInput" multiple accept="image/*" />
         </div>
     </div>
-
     <div id="imagePreviewList"></div>
     <input type="hidden" name="ImagesJson" id="ImagesJson" />
 

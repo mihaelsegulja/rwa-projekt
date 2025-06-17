@@ -35,7 +35,12 @@ public class MaterialController : Controller
             return View("Index", _mapper.Map<List<MaterialVm>>(materials));
         }
 
-        await _materialService.AddMaterialAsync(vm.Name.Trim());
+        var result = await _materialService.AddMaterialAsync(vm.Name.Trim());
+        if (result != null)
+            TempData["Success"] = result;
+        else
+            TempData["Error"] = "Failed to add new material";
+
         return RedirectToAction("Index");
     }
 
