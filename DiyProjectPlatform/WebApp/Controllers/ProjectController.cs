@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using Core.Dtos;
 using Core.Interfaces;
-using Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Shared.Enums;
+using Shared.Exceptions;
 using Shared.Helpers;
 using System.Security.Claims;
 using System.Text.Json;
@@ -97,20 +97,10 @@ public class ProjectController : Controller
     public async Task<IActionResult> Details(int id)
     {
         var dto = await _projectService.GetProjectByIdAsync(id);
-        if (dto == null)
-            return NotFound();
-
         var commentDtos = await _commentService.GetAllCommentsByProjectIdAsync(id, 1, 50);
 
         var vm = _mapper.Map<ProjectDetailVm>(dto);
-
-        vm.Comments = commentDtos.Select(c => new CommentVm
-        {
-            Id = c.Id,
-            Content = c.Content,
-            DateCreated = c.DateCreated,
-            Username = c.Username
-        }).ToList();
+        vm.Comments = _mapper.Map<List<CommentVm>>(commentDtos);
 
         return View(vm);
     }
@@ -145,6 +135,7 @@ public class ProjectController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "Project creation failed";
             vm.Topics = (await _topicService.GetAllTopicsAsync())
                 .Select(t => new SelectListItem { Value = t.Id.ToString(), Text = t.Name }).ToList();
             vm.AllMaterials = (await _materialService.GetAllMaterialsAsync()).ToList();
@@ -172,8 +163,8 @@ public class ProjectController : Controller
         };
 
         var result = await _projectService.AddProjectAsync(createDto, currentUserId);
-
         TempData["Success"] = result;
+
         return RedirectToAction("Index");
     }
 
@@ -181,11 +172,9 @@ public class ProjectController : Controller
     public async Task<IActionResult> Edit(int id)
     {
         var projectDetail = await _projectService.GetProjectByIdAsync(id);
-        if (projectDetail == null)
-            return NotFound();
 
         if (User.Identity?.Name != projectDetail.Username && !User.IsInRole(nameof(UserRole.Admin)))
-            return Forbid();
+            throw new ForbiddenException("Not allowed to edit this project");
 
         var materials = await _materialService.GetAllMaterialsAsync();
         var topics = await _topicService.GetAllTopicsAsync();
@@ -212,6 +201,7 @@ public class ProjectController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "Project update failed";
             var materials = await _materialService.GetAllMaterialsAsync();
             var topics = await _topicService.GetAllTopicsAsync();
             vm.AllMaterials = materials.Select(m => new SelectListItem { Value = m.Id.ToString(), Text = m.Name }).ToList();
@@ -233,8 +223,6 @@ public class ProjectController : Controller
         };
 
         var result = await _projectService.UpdateProjectAsync(updateDto, currentUserId);
-        if (result == null)
-            return NotFound();
 
         var images = JsonSerializer.Deserialize<List<ImageDto>>(imagesJson);
 
@@ -255,15 +243,7 @@ public class ProjectController : Controller
     {
         var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var result = await _projectService.DeleteProjectAsync(id, userId);
-        if (result != null)
-        {
-            TempData["Success"] = result;
-        }
-        else
-        {
-            TempData["Error"] = "Update failed";
-            return NotFound();
-        }
+        TempData["Success"] = result;
 
         return RedirectToAction("Index");
     }

@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Enums;
+using Shared.Exceptions;
 using WebApp.ViewModels;
 
 namespace WebApp.Controllers;
@@ -31,15 +32,20 @@ public class TopicController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "Invalid topic";
             var topics = await _topicService.GetAllTopicsAsync();
             return View("Index", _mapper.Map<List<TopicVm>>(topics));
         }
 
-        var result = await _topicService.AddTopicAsync(vm.Name.Trim());
-        if (result != null)
+        try
+        {
+            var result = await _topicService.AddTopicAsync(vm.Name.Trim());
             TempData["Success"] = result;
-        else
-            TempData["Error"] = "Failed to add new topic";
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
 
         return RedirectToAction("Index");
     }
@@ -49,17 +55,22 @@ public class TopicController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "Invalid update";
             var topics = await _topicService.GetAllTopicsAsync();
             return View("Index", _mapper.Map<List<TopicVm>>(topics));
         }
 
-        vm.Name = vm.Name.Trim();
-        var dto = _mapper.Map<TopicDto>(vm);
-        var result = await _topicService.UpdateTopicAsync(dto);
-        if (result != null)
+        try
+        {
+            vm.Name = vm.Name.Trim();
+            var dto = _mapper.Map<TopicDto>(vm);
+            var result = await _topicService.UpdateTopicAsync(dto);
             TempData["Success"] = result;
-        else
-            TempData["Error"] = "Update failed";
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
 
         return RedirectToAction("Index");
     }

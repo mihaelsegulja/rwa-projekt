@@ -23,5 +23,9 @@ public class CoreMappingProfile : Profile
         CreateMap<ProjectStatus, ProjectStatusDto>().ReverseMap();
         CreateMap<Image, ImageDto>().ReverseMap();
         CreateMap<Log, LogDto>().ReverseMap();
+        CreateMap<ProjectStatus, ProjectStatusListDto>()
+            .ForMember(dest => dest.ProjectTitle, opt => opt.MapFrom(src => src.Project.Title))
+            .ForMember(dest => dest.AuthorUsername, opt => opt.MapFrom(src => src.Project.User.Username))
+            .ForMember(dest => dest.ApproverUsername, opt => opt.MapFrom(src => src.Approver != null ? src.Approver.Username : string.Empty));
     }
 }

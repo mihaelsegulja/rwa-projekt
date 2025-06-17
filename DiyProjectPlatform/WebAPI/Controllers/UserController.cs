@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Core.Dtos;
 using Shared.Helpers;
 using Core.Interfaces;
+using Shared.Exceptions;
 
 namespace WebAPI.Controllers;
 
@@ -24,116 +25,63 @@ public class UserController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterDto registerDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-                return BadRequest("Invalid input");
+        if (!ModelState.IsValid)
+            return BadRequest("Invalid input");
 
-            var result = await _userService.UserRegisterAsync(registerDto);
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
+        var result = await _userService.UserRegisterAsync(registerDto);
+        return Ok(result);
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserLoginDto loginDto)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-                return BadRequest("Invalid input");
+        if (!ModelState.IsValid)
+            return BadRequest("Invalid input");
 
-            var token = await _userService.UserLoginAsync(loginDto);
-            return token == null ? Unauthorized("Incorrect username or password") : Ok(token);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
+        var token = await _userService.UserLoginAsync(loginDto);
+        return token == null ? Unauthorized("Incorrect username or password") : Ok(token);
     }
 
     [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
     [HttpGet("all")]
     public async Task<IActionResult> GetAllUsers(int page = 1, int pageSize = 10)
     {
-        try
-        {
-            var users = await _userService.GetAllUsersAsync(page, pageSize);
-            return Ok(users);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
+        var users = await _userService.GetAllUsersAsync(page, pageSize);
+        return Ok(users);
     }
 
     [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(int id)
     {
-        try
-        {
-            var user = await _userService.GetUserByIdAsync(id);
-            return user == null ? NotFound("User not found") : Ok(user);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
+        var user = await _userService.GetUserByIdAsync(id);
+        return Ok(user);
     }
 
     [Authorize]
     [HttpPut("update-profile")]
     public async Task<IActionResult> UpdateProfile(UserProfileDto profile)
     {
-        try
-        {
-            var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-            var result = await _userService.UpdateUserProfileAsync(userId, profile);
-            return result == null ? NotFound("User not found") : Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
+        var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+        var result = await _userService.UpdateUserProfileAsync(userId, profile);
+        return Ok(result);
     }
 
     [Authorize]
     [HttpPut("change-password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
     {
-        try
-        {
-            var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-            var result = await _userService.ChangeUserPasswordAsync(userId, changePasswordDto);
-            return result == null ? NotFound("User not found") : Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
+        var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+        var result = await _userService.ChangeUserPasswordAsync(userId, changePasswordDto);
+        return result == null ? NotFound("User not found") : Ok(result);
     }
 
     [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        try
-        {
-            var adminId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-            var result = await _userService.DeleteUserAsync(adminId, id);
-            return result == null ? NotFound("User not found") : Ok(result);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
-        }
+        var adminId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+        var result = await _userService.DeleteUserAsync(adminId, id);
+        return Ok(result);
     }
 }

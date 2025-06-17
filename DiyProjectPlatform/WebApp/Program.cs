@@ -1,6 +1,7 @@
 using Core.Context;
 using Core.Interfaces;
 using Core.Mappings;
+using Core.Middleware;
 using Core.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,7 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/Error/{0}");
 app.UseStaticFiles();
 app.UseRouting();
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 

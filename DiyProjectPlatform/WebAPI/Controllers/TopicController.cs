@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Core.Dtos;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers;
 
@@ -23,74 +23,35 @@ public class TopicController : ControllerBase
     [HttpGet("all")]
     public async Task<IActionResult> GetAllTopics()
     {
-        try
-        {
-            var topics = await _topicService.GetAllTopicsAsync();
-            return Ok(topics);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var topics = await _topicService.GetAllTopicsAsync();
+        return Ok(topics);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTopicById(int id)
     {
-        try
-        {
-            var topic = await _topicService.GetTopicByIdAsync(id);
-            return topic == null ? NotFound() : Ok(topic);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var topic = await _topicService.GetTopicByIdAsync(id);
+        return Ok(topic);
     }
 
     [HttpPost("add")]
     public async Task<IActionResult> AddTopic(string topic)
     {
-        try
-        {
-            var result = await _topicService.AddTopicAsync(topic);
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var result = await _topicService.AddTopicAsync(topic);
+        return Ok(result);
     }
 
     [HttpPut("update")]
     public async Task<IActionResult> UpdateTopic(TopicDto topic)
     {
-        try
-        {
-            var result = await _topicService.UpdateTopicAsync(topic);
-            return result == null ? NotFound() : Ok(result);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var result = await _topicService.UpdateTopicAsync(topic);
+        return Ok(result);
     }
 
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteTopic(int id)
     {
-        try
-        {
-            var result = await _topicService.DeleteTopicAsync(id);
-            return result == null ? NotFound() : Ok(result);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var result = await _topicService.DeleteTopicAsync(id);
+        return Ok(result);
     }
 }

@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Core.Context;
 using Core.Dtos;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.Enums;
+using Shared.Exceptions;
 using Shared.Results;
 
 namespace Core.Services;
@@ -56,7 +58,7 @@ public class ProjectService : IProjectService
                 Description = p.Description,
                 DateCreated = p.DateCreated,
                 TopicName = p.Topic.Name,
-                DifficultyLevel =((Shared.Enums.DifficultyLevel)p.DifficultyLevelId).ToString(),
+                DifficultyLevel = ((Shared.Enums.DifficultyLevel)p.DifficultyLevelId).ToString(),
                 Username = p.User.Username,
                 MainImageId = p.ProjectImages
                     .Where(i => i.IsMainImage)
@@ -73,7 +75,7 @@ public class ProjectService : IProjectService
         };
     }
 
-    public async Task<ProjectDetailDto?> GetProjectByIdAsync(int id)
+    public async Task<ProjectDetailDto> GetProjectByIdAsync(int id)
     {
         var project = await _dbContext.Projects
             .Where(p => p.ProjectStatuses.Any(ps =>
@@ -83,9 +85,8 @@ public class ProjectService : IProjectService
            .Include(p => p.ProjectImages)
            .Include(p => p.User)
            .Include(p => p.Topic)
-           .FirstOrDefaultAsync(p => p.Id == id);
-
-        if (project == null) return null;
+           .FirstOrDefaultAsync(p => p.Id == id) 
+           ?? throw new NotFoundException($"Project {id} not found");
 
         var imageIds = project.ProjectImages.Select(pi => pi.ImageId).ToList();
 
@@ -124,22 +125,12 @@ public class ProjectService : IProjectService
 
         var totalItems = await query.CountAsync();
 
-        var statuses = await query
+        var items = await query
             .OrderByDescending(s => s.DateModified)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .ProjectTo<ProjectStatusListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-
-        var items = statuses.Select(s => new ProjectStatusListDto
-        {
-            Id = s.Id,
-            ProjectId = s.ProjectId,
-            ProjectTitle = s.Project.Title,
-            StatusTypeId = s.StatusTypeId,
-            ApproverUsername = s.Approver?.Username ?? string.Empty,
-            AuthorUsername = s.Project.User.Username,
-            DateModified = s.DateModified
-        }).ToList();
 
         return new PagedResult<ProjectStatusListDto>
         {
@@ -214,18 +205,15 @@ public class ProjectService : IProjectService
     }
 
 
-    public async Task<string?> UpdateProjectAsync(ProjectUpdateDto projectUpdateDto, int currentUserId)
+    public async Task<string> UpdateProjectAsync(ProjectUpdateDto projectUpdateDto, int currentUserId)
     {
         var project = await _dbContext.Projects
-        .Include(p => p.ProjectMaterials)
-        .FirstOrDefaultAsync(p => p.Id == projectUpdateDto.Project.Id);
+            .Include(p => p.ProjectMaterials)
+            .FirstOrDefaultAsync(p => p.Id == projectUpdateDto.Project.Id) 
+            ?? throw new NotFoundException($"Project {projectUpdateDto.Project.Id} not found");
 
-        if (project == null)
-            return null;
-
-        var currentUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
-        if (currentUser == null)
-            return "User not found";
+        var currentUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == currentUserId)
+            ?? throw new NotFoundException($"User {currentUserId} not found");
 
         var isAuthor = project.UserId == currentUserId;
         var isAdmin = currentUser.UserRoleId == (int)Shared.Enums.UserRole.Admin;
@@ -233,7 +221,7 @@ public class ProjectService : IProjectService
         if (!isAuthor && !isAdmin)
         {
             await _logService.AddLogAsync($"User {currentUserId} with no permission tried to update project {project.Id}", LogLevel.Warning);
-            return "You do not have permission to update this project";
+            throw new UnauthorizedAccessException("You do not have permission to update this project.");
         }
 
         _mapper.Map(projectUpdateDto.Project, project);
@@ -262,10 +250,10 @@ public class ProjectService : IProjectService
         return "Project updated";
     }
 
-    public async Task<string?> UpdateProjectStatusAsync(ProjectStatusDto projectStatusDto)
+    public async Task<string> UpdateProjectStatusAsync(ProjectStatusDto projectStatusDto)
     {
-        var status = await _dbContext.ProjectStatuses.FirstOrDefaultAsync(s => s.Id == projectStatusDto.Id);
-        if (status == null) return null;
+        var status = await _dbContext.ProjectStatuses.FirstOrDefaultAsync(s => s.Id == projectStatusDto.Id) 
+            ?? throw new NotFoundException($"Project status {projectStatusDto.Id} not found");
 
         _mapper.Map(projectStatusDto, status);
         status.DateModified = DateTime.UtcNow;
@@ -275,10 +263,10 @@ public class ProjectService : IProjectService
         return "Project status updated";
     }
 
-    public async Task<string?> DeleteProjectAsync(int projectId, int currentUserId)
+    public async Task<string> DeleteProjectAsync(int projectId, int currentUserId)
     {
-        var status = await _dbContext.ProjectStatuses.FirstOrDefaultAsync(s => s.ProjectId == projectId);
-        if (status == null) return null;
+        var status = await _dbContext.ProjectStatuses.FirstOrDefaultAsync(s => s.ProjectId == projectId) 
+            ?? throw new NotFoundException($"Project status for project {projectId} not found");
 
         status.StatusTypeId = (int)Shared.Enums.ProjectStatusType.Deleted;
         status.DateModified = DateTime.UtcNow;
