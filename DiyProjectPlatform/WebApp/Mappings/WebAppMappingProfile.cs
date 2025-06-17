@@ -32,5 +32,7 @@ public class WebAppMappingProfile : Profile
         CreateMap<TopicDto, TopicVm>().ReverseMap();
         CreateMap<ProjectDto, ProjectVm>().ReverseMap();
         CreateMap<ProjectFilterVm, ProjectFilterDto>();
+        CreateMap<ProjectStatusListDto, ProjectStatusListVm>();
+        CreateMap<CommentDto, CommentVm>();
     }
 }

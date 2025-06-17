@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.Enums;
+using Shared.Exceptions;
 using Shared.Helpers;
 
 namespace Core.Services;
@@ -26,7 +27,7 @@ public class UserService : IUserService
     {
         var username = registerDto.Username.Trim();
         if (await _dbContext.Users.AnyAsync(u => u.Username == username))
-            throw new InvalidOperationException($"Username '{username}' already exists");
+            throw new ConflictException($"Username '{username}' already exists");
 
         var salt = PasswordHashHelper.GetSalt();
         var hash = PasswordHashHelper.GetHash(registerDto.Password, salt);
@@ -47,17 +48,17 @@ public class UserService : IUserService
     public async Task<string?> UserLoginAsync(UserLoginDto loginDto)
     {
         var user = await _dbContext.Users
-            .FirstOrDefaultAsync(u => u.Username == loginDto.Username && u.IsActive);
-        if (user == null) return null;
+            .FirstOrDefaultAsync(u => u.Username == loginDto.Username && u.IsActive) 
+            ?? throw new NotFoundException($"User '{loginDto.Username}' not found or inactive");
 
         var hash = PasswordHashHelper.GetHash(loginDto.Password, user.PasswordSalt);
-        if (hash != user.PasswordHash) return null;
+        if (hash != user.PasswordHash)
+            throw new UnauthorizedAccessException("Invalid credentials");
 
         var role = await _dbContext.UserRoles
             .FirstOrDefaultAsync(r => r.Id == user.UserRoleId);
         
         string token = JwtTokenHelper.CreateToken(loginDto.Username, user.Id.ToString(), role?.Name ?? nameof(Shared.Enums.UserRole.User));
-        await _logService.AddLogAsync($"User {user.Id} logged in", LogLevel.Debug);
         return token;
     }
 
@@ -72,16 +73,18 @@ public class UserService : IUserService
         return _mapper.Map<IEnumerable<UserDto>>(users);
     }
 
-    public async Task<UserDto?> GetUserByIdAsync(int id)
+    public async Task<UserDto> GetUserByIdAsync(int id)
     {
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id && u.IsActive);
-        return user == null ? null : _mapper.Map<UserDto>(user);
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id && u.IsActive) 
+            ?? throw new NotFoundException($"User {id} not found or inactive");
+
+        return _mapper.Map<UserDto>(user);
     }
 
-    public async Task<string?> UpdateUserProfileAsync(int currentUserId, UserProfileDto profileDto)
+    public async Task<string> UpdateUserProfileAsync(int currentUserId, UserProfileDto profileDto)
     {
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
-        if (user == null) return null;
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == currentUserId)
+            ?? throw new NotFoundException($"User {currentUserId} not found");
 
         user.Username = profileDto.Username;
         user.FirstName = profileDto.FirstName;
@@ -96,14 +99,14 @@ public class UserService : IUserService
         return "Profile updated";
     }
 
-    public async Task<string?> ChangeUserPasswordAsync(int userId, ChangePasswordDto changePasswordDto)
+    public async Task<string> ChangeUserPasswordAsync(int userId, ChangePasswordDto changePasswordDto)
     {
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return null;
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId) 
+            ?? throw new NotFoundException($"User {userId} not found");
 
         var currentHash = PasswordHashHelper.GetHash(changePasswordDto.CurrentPassword, user.PasswordSalt);
         if (currentHash != user.PasswordHash)
-            throw new InvalidOperationException("Current password is incorrect");
+            throw new UnauthorizedAccessException("Current password is incorrect");
 
         var newSalt = PasswordHashHelper.GetSalt();
         var newHash = PasswordHashHelper.GetHash(changePasswordDto.NewPassword, newSalt);
@@ -115,13 +118,13 @@ public class UserService : IUserService
         return "Password changed successfully";
     }
 
-    public async Task<string?> DeleteUserAsync(int adminId, int userId)
+    public async Task<string> DeleteUserAsync(int adminId, int userId)
     {
         if (adminId == userId)
-            throw new InvalidOperationException("You cannot delete your own account");
+            throw new ForbiddenException("You cannot delete your own account");
 
-        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-        if (user == null) return null;
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId) 
+            ?? throw new NotFoundException($"User {userId} not found");
 
         user.IsActive = false;
         user.DateDeleted = DateTime.UtcNow;

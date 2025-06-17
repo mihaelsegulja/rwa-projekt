@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.Enums;
+using Shared.Exceptions;
 
 namespace Core.Services;
 
@@ -43,10 +44,11 @@ public class CommentService : ICommentService
         await _logService.AddLogAsync($"User {commentDto.UserId} commented on project {commentDto.ProjectId}", LogLevel.Info);
     }
 
-    public async Task<string?> UpdateCommentAsync(CommentUpdateDto commentDto, int currentUserId)
+    public async Task<string> UpdateCommentAsync(CommentUpdateDto commentDto, int currentUserId)
     {
-        var existing = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == commentDto.Id && c.UserId == currentUserId);
-        if (existing == null) return null;
+        var existing = await _dbContext.Comments
+            .FirstOrDefaultAsync(c => c.Id == commentDto.Id && c.UserId == currentUserId) 
+            ?? throw new NotFoundException($"Comment {commentDto.Id} not found");
 
         existing.Content = commentDto.Content;
         await _dbContext.SaveChangesAsync();
@@ -55,14 +57,12 @@ public class CommentService : ICommentService
         return "Comment updated";
     }
 
-    public async Task<string?> DeleteCommentAsync(int id)
+    public async Task<string> DeleteCommentAsync(int id)
     {
-        var existing = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id);
-        if (existing == null) return null;
-        if (existing.Content == "deleted") 
-            return "Comment already deleted";
+        var existing = await _dbContext.Comments.FirstOrDefaultAsync(c => c.Id == id) 
+            ?? throw new NotFoundException($"Comment {id} not found");
 
-        existing.Content = "deleted";
+        _dbContext.Comments.Remove(existing);
         await _dbContext.SaveChangesAsync();
         await _logService.AddLogAsync($"Comment {id} deleted", LogLevel.Info);
 

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -23,37 +22,26 @@ namespace WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetImage(int id)
         {
-            try
-            {
-                var (bytes, contentType) = await _imageService.GetImageAsync(id);
-                if (bytes == null || contentType == null)
-                    return NotFound("Image not found");
+            var (bytes, contentType) = await _imageService.GetImageAsync(id);
+            if (bytes == null || contentType == null)
+                return NotFound("Image not found");
                 
-                return Ok(File(bytes, contentType));
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }
+            return Ok(File(bytes, contentType));
         }
 
         [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteImage(int id)
         {
-            try
-            {
-                var result = await _imageService.DeleteImageAsync(id);
-                return Ok(result);
-            }
-            catch (InvalidOperationException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }
+            var result = await _imageService.DeleteImageAsync(id);
+            return Ok(result);
+        }
+
+        [HttpDelete("delete-project-images")]
+        public async Task<IActionResult> DeleteImagesByProjectId(int projectId)
+        {
+            await _imageService.DeleteImagesByProjectIdAsync(projectId);
+            return Ok($"Successfully deleted all images for project {projectId}");
         }
     }
 }

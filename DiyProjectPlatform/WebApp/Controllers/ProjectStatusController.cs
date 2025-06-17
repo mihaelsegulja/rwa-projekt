@@ -1,4 +1,5 @@
-﻿using Core.Dtos;
+﻿using AutoMapper;
+using Core.Dtos;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,12 @@ namespace WebApp.Controllers;
 public class ProjectStatusController : Controller
 {
     private readonly IProjectService _projectService;
+    private readonly IMapper _mapper;
 
-    public ProjectStatusController(IProjectService projectService)
+    public ProjectStatusController(IProjectService projectService, IMapper mapper)
     {
         _projectService = projectService;
+        _mapper = mapper;
     }
 
     public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
@@ -36,18 +39,7 @@ public class ProjectStatusController : Controller
                 Text = st.ToString(),
                 Value = ((int)st).ToString()
             }).ToList(),
-
-            Statuses = result.Items.Select(s => new ProjectStatusListVm
-            {
-                Id = s.Id,
-                ProjectId = s.ProjectId,
-                ProjectTitle = s.ProjectTitle,
-                AuthorUsername = s.AuthorUsername,
-                StatusTypeId = s.StatusTypeId,
-                DateModified = s.DateModified,
-                ApproverUsername = s.ApproverUsername,
-                SelectedStatusTypeId = s.StatusTypeId
-            }).ToList()
+            Statuses = _mapper.Map<List<ProjectStatusListVm>>(result.Items)
         };
 
         return View(vm);
@@ -68,18 +60,7 @@ public class ProjectStatusController : Controller
                 Text = st.ToString(),
                 Value = ((int)st).ToString()
             }).ToList(),
-
-            Statuses = result.Items.Select(s => new ProjectStatusListVm
-            {
-                Id = s.Id,
-                ProjectId = s.ProjectId,
-                ProjectTitle = s.ProjectTitle,
-                AuthorUsername = s.AuthorUsername,
-                StatusTypeId = s.StatusTypeId,
-                DateModified = s.DateModified,
-                ApproverUsername = s.ApproverUsername,
-                SelectedStatusTypeId = s.StatusTypeId
-            }).ToList()
+            Statuses = _mapper.Map<List<ProjectStatusListVm>>(result.Items)
         };
 
         return PartialView("_ProjectStatusListPartial", vm);
@@ -100,10 +81,7 @@ public class ProjectStatusController : Controller
         };
 
         var result = await _projectService.UpdateProjectStatusAsync(dto);
-        if (result != null)
-            TempData["Success"] = result;
-        else
-            TempData["Error"] = "Failed to update project status.";
+        TempData["Success"] = result;
 
         return RedirectToAction("Index");
     }

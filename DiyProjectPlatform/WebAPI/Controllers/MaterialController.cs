@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
+using Core.Dtos;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Core.Dtos;
 
 namespace WebAPI.Controllers;
 
@@ -23,74 +23,35 @@ public class MaterialController : ControllerBase
     [HttpGet("all")]
     public async Task<IActionResult> GetAllMaterials()
     {
-        try
-        {
-            var materials = await _materialService.GetAllMaterialsAsync();
-            return Ok(materials);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var materials = await _materialService.GetAllMaterialsAsync();
+        return Ok(materials);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetMaterialById(int id)
     {
-        try
-        {
-            var material = await _materialService.GetMaterialByIdAsync(id);
-            return material == null ? NotFound() : Ok(material);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var material = await _materialService.GetMaterialByIdAsync(id);
+        return Ok(material);
     }
 
     [HttpPost("add")]
     public async Task<IActionResult> AddMaterial(string material)
     {
-        try
-        {
-            var result = await _materialService.AddMaterialAsync(material);
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var result = await _materialService.AddMaterialAsync(material);
+        return Ok(result);
     }
 
     [HttpPut("update")]
     public async Task<IActionResult> UpdateMaterial(MaterialDto material)
     {
-        try
-        {
-            var result = await _materialService.UpdateMaterialAsync(material);
-            return result == null ? NotFound() : Ok(result);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var result = await _materialService.UpdateMaterialAsync(material);
+        return Ok(result);
     }
 
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteMaterial(int id)
     {
-        try
-        {
-            var result = await _materialService.DeleteMaterialAsync(id);
-            return result == null ? NotFound() : Ok(result);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var result = await _materialService.DeleteMaterialAsync(id);
+        return Ok(result);
     }
 }

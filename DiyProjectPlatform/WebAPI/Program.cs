@@ -1,12 +1,13 @@
-using Shared.Config;
 using Core.Context;
 using Core.Interfaces;
 using Core.Mappings;
+using Core.Middleware;
 using Core.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Shared.Config;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -90,10 +91,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
-
+app.UseRouting();
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

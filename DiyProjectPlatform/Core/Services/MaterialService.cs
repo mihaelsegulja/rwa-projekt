@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using Core.Context;
+using Core.Dtos;
 using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
-using Core.Dtos;
 using Shared.Enums;
+using Shared.Exceptions;
 
 namespace Core.Services;
 
@@ -27,10 +28,12 @@ public class MaterialService : IMaterialService
         return _mapper.Map<IEnumerable<MaterialDto>>(materials);
     }
 
-    public async Task<MaterialDto?> GetMaterialByIdAsync(int id)
+    public async Task<MaterialDto> GetMaterialByIdAsync(int id)
     {
-        var material = await _dbContext.Materials.FindAsync(id);
-        return material == null ? null : _mapper.Map<MaterialDto>(material);
+        var material = await _dbContext.Materials.FindAsync(id) 
+            ?? throw new NotFoundException($"Material {id} not found");
+
+        return _mapper.Map<MaterialDto>(material);
     }
 
     public async Task<string> AddMaterialAsync(string name)
@@ -38,7 +41,7 @@ public class MaterialService : IMaterialService
         var trimmed = name.Trim();
 
         if (await _dbContext.Materials.AnyAsync(m => m.Name == trimmed))
-            throw new InvalidOperationException($"Material '{trimmed}' already exists");
+            throw new ConflictException($"Material '{trimmed}' already exists");
 
         var material = new Material { Name = trimmed };
         await _dbContext.Materials.AddAsync(material);
@@ -48,10 +51,10 @@ public class MaterialService : IMaterialService
         return $"Material {trimmed} successfully added";
     }
 
-    public async Task<string?> UpdateMaterialAsync(MaterialDto materialDto)
+    public async Task<string> UpdateMaterialAsync(MaterialDto materialDto)
     {
-        var material = await _dbContext.Materials.FindAsync(materialDto.Id);
-        if (material == null) return null;
+        var material = await _dbContext.Materials.FindAsync(materialDto.Id) 
+            ?? throw new NotFoundException($"Material {materialDto.Id} not found");
 
         material.Name = materialDto.Name.Trim();
         await _dbContext.SaveChangesAsync();
@@ -60,10 +63,10 @@ public class MaterialService : IMaterialService
         return $"Material {material.Id} successfully updated";
     }
 
-    public async Task<string?> DeleteMaterialAsync(int id)
+    public async Task<string> DeleteMaterialAsync(int id)
     {
-        var material = await _dbContext.Materials.FindAsync(id);
-        if (material == null) return null;
+        var material = await _dbContext.Materials.FindAsync(id) 
+            ?? throw new NotFoundException($"Material {id} not found");
 
         _dbContext.Materials.Remove(material);
         await _dbContext.SaveChangesAsync();

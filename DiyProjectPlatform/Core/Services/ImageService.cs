@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Shared.Enums;
+using Shared.Exceptions;
 
 namespace Core.Services;
 
@@ -37,6 +38,9 @@ public class ImageService : IImageService
 
     public async Task AddImagesToProjectAsync(int projectId, List<ImageDto> images)
     {
+        var project = await _dbContext.Projects.FindAsync(projectId) 
+            ?? throw new NotFoundException($"Project {projectId} not found");
+
         foreach (var imageDto in images)
         {
             var image = _mapper.Map<Image>(imageDto);
@@ -60,14 +64,15 @@ public class ImageService : IImageService
 
     public async Task<string> DeleteImageAsync(int id)
     {
-        var image = await _dbContext.Images.FindAsync(id);
-        if (image == null)
-            throw new InvalidOperationException($"Image {id} not found");
+        var image = await _dbContext.Images.FindAsync(id) 
+            ?? throw new NotFoundException($"Image {id} not found");
 
-        _dbContext.ProjectImages.RemoveRange(
-            _dbContext.ProjectImages.Where(pi => pi.ImageId == id)
-        );
+        var projectImages = await _dbContext.ProjectImages
+        .Where(pi => pi.ImageId == id)
+        .ToListAsync();
+        _dbContext.ProjectImages.RemoveRange(projectImages);
         _dbContext.Images.Remove(image);
+
         await _dbContext.SaveChangesAsync();
         await _logService.AddLogAsync($"Image {id} deleted", LogLevel.Info);
 
@@ -79,8 +84,7 @@ public class ImageService : IImageService
         var projectImages = await _dbContext.ProjectImages
             .Where(pi => pi.ProjectId == projectId)
             .ToListAsync();
-        if (projectImages == null)
-            throw new InvalidOperationException($"Project does not have images");
+        if (projectImages.Count == 0) return;
 
         var imageIds = projectImages.Select(pi => pi.ImageId).ToList();
 

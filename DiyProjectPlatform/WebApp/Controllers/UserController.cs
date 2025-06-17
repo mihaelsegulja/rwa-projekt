@@ -45,10 +45,7 @@ public class UserController : Controller
         var dto = _mapper.Map<UserProfileDto>(profile);
         var result = await _userService.UpdateUserProfileAsync(userId, dto);
 
-        if (result == null)
-            return BadRequest(new { General = "Update failed" });
-
-        return Ok("Profile updated successfully.");
+        return Ok(result);
     }
 
     [HttpGet]
@@ -73,9 +70,6 @@ public class UserController : Controller
         var dto = _mapper.Map<ChangePasswordDto>(vm);
         var result = await _userService.ChangeUserPasswordAsync(userId, dto);
 
-        if (result == null)
-            return BadRequest(new { General = "Password change failed" });
-
-        return Ok("Password successfully changed.");
+        return Ok(result);
     }
 }

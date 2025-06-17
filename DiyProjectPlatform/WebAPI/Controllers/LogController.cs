@@ -20,30 +20,16 @@ public class LogController : ControllerBase
     }
     
     [HttpGet("{n}")]
-    public async Task<IActionResult> GetLastNLogs(int n)
+    public async Task<IActionResult> GetLastNLogs(int n = 10)
     {
-        try
-        {
-            var logs = await _logService.GetLastNLogsAsync(n);
-            return Ok(logs);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var logs = await _logService.GetLastNLogsAsync(n);
+        return Ok(logs);
     }
     
     [HttpGet("count")]
     public async Task<IActionResult> GetLogCount()
     {
-        try
-        {
-            var result = await _logService.GetLogCountAsync();
-            return Ok(result);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var result = await _logService.GetLogCountAsync();
+        return Ok(result);
     }
 }

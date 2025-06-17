@@ -3,6 +3,7 @@ using Core.Dtos;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Exceptions;
 using Shared.Helpers;
 using System.Security.Claims;
 using WebApp.ViewModels;
@@ -30,11 +31,18 @@ public class CommentController : Controller
             return RedirectToAction("Details", "Project", new { id = dto.ProjectId });
         }
 
-        dto.UserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-        dto.DateCreated = DateTime.UtcNow;
+        try
+        {
+            dto.UserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            dto.DateCreated = DateTime.UtcNow;
+            await _commentService.AddCommentAsync(dto);
+            TempData["Success"] = "Comment added";
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
 
-        await _commentService.AddCommentAsync(dto);
-        TempData["Success"] = "Comment added";
         return RedirectToAction("Details", "Project", new { id = dto.ProjectId });
     }
 
@@ -43,28 +51,37 @@ public class CommentController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "Invalid update";
             return RedirectToAction("Details", "Project", new { id = vm.ProjectId });
         }
 
-        int userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-        var dto = _mapper.Map<CommentUpdateDto>(vm);
-        var result = await _commentService.UpdateCommentAsync(dto, userId);
-        if (result != null)
+        try
+        {
+            int userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+            var dto = _mapper.Map<CommentUpdateDto>(vm);
+            var result = await _commentService.UpdateCommentAsync(dto, userId);
             TempData["Success"] = result;
-        else
-            TempData["Error"] = "Update failed";
-
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
+        
         return RedirectToAction("Details", "Project", new { id = vm.ProjectId });
     }
 
     [HttpPost]
     public async Task<IActionResult> Delete(int id, int projectId)
     {
-        var result = await _commentService.DeleteCommentAsync(id);
-        if (result != null)
-            TempData["Success"] = result;
-        else
-            TempData["Error"] = "Delete failed";
+        try
+        {
+            await _commentService.DeleteCommentAsync(id);
+            TempData["Success"] = "Comment deleted";
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
 
         return RedirectToAction("Details", "Project", new { id = projectId });
     }

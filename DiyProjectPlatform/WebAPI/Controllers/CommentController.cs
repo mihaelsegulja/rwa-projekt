@@ -25,57 +25,29 @@ public class CommentController : ControllerBase
     [HttpGet("all/{projectId}")]
     public async Task<IActionResult> GetAllCommentsForProject(int projectId, int page = 1, int pageSize = 10)
     {
-        try
-        {
-            var comments = await _commentService.GetAllCommentsByProjectIdAsync(projectId, page, pageSize);
-            return Ok(comments);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var comments = await _commentService.GetAllCommentsByProjectIdAsync(projectId, page, pageSize);
+        return Ok(comments);
     }
 
     [HttpPost("add")]
     public async Task<IActionResult> AddComment(CommentDto comment)
     {
-        try
-        {
-            await _commentService.AddCommentAsync(comment);
-            return Ok();
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        await _commentService.AddCommentAsync(comment);
+        return Ok();
     }
 
     [HttpPut("update")]
     public async Task<IActionResult> UpdateComment(CommentUpdateDto comment)
     {
-        try
-        {
-            int currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-            var result = await _commentService.UpdateCommentAsync(comment, currentUserId);
-            return Ok(result);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        int currentUserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
+        var result = await _commentService.UpdateCommentAsync(comment, currentUserId);
+        return Ok(result);
     }
 
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteComment(int id)
     {
-        try
-        {
-            var result = await _commentService.DeleteCommentAsync(id);
-            return Ok(result);
-        }
-        catch (Exception e)
-        {
-            return StatusCode(500, e.Message);
-        }
+        var result = await _commentService.DeleteCommentAsync(id);
+        return Ok(result);
     }
 }

@@ -4,6 +4,7 @@ using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Enums;
+using Shared.Exceptions;
 using WebApp.ViewModels;
 
 namespace WebApp.Controllers;
@@ -31,15 +32,20 @@ public class MaterialController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "Invalid material";
             var materials = await _materialService.GetAllMaterialsAsync();
             return View("Index", _mapper.Map<List<MaterialVm>>(materials));
         }
 
-        var result = await _materialService.AddMaterialAsync(vm.Name.Trim());
-        if (result != null)
+        try
+        {
+            var result = await _materialService.AddMaterialAsync(vm.Name.Trim());
             TempData["Success"] = result;
-        else
-            TempData["Error"] = "Failed to add new material";
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
 
         return RedirectToAction("Index");
     }
@@ -49,17 +55,22 @@ public class MaterialController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "Invalid update";
             var materials = await _materialService.GetAllMaterialsAsync();
             return View("Index", _mapper.Map<List<MaterialVm>>(materials));
         }
 
-        vm.Name = vm.Name.Trim();
-        var dto = _mapper.Map<MaterialDto>(vm);
-        var result = await _materialService.UpdateMaterialAsync(dto);
-        if (result != null)
+        try
+        {
+            vm.Name = vm.Name.Trim();
+            var dto = _mapper.Map<MaterialDto>(vm);
+            var result = await _materialService.UpdateMaterialAsync(dto);
             TempData["Success"] = result;
-        else
-            TempData["Error"] = "Update failed";
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
 
         return RedirectToAction("Index");
     }
