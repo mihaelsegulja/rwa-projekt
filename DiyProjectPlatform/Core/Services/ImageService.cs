@@ -38,6 +38,9 @@ public class ImageService : IImageService
 
     public async Task AddImagesToProjectAsync(int projectId, List<ImageDto> images)
     {
+        if (images == null || images.Count == 0)
+            throw new BadRequestException("No images provided for the project");
+
         var project = await _dbContext.Projects.FindAsync(projectId) 
             ?? throw new NotFoundException($"Project {projectId} not found");
 

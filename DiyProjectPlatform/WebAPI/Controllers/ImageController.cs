@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Core.Dtos;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,14 @@ namespace WebAPI.Controllers
         }
 
         [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
+        [HttpPost("upload")]
+        public async Task<IActionResult> UpladImagesForProject(int projectId, [FromBody] List<ImageDto> images)
+        {
+            await _imageService.AddImagesToProjectAsync(projectId, images);
+            return Ok($"Successfully added {images.Count} images to project {projectId}");
+        }
+
+        [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteImage(int id)
         {
@@ -37,6 +46,7 @@ namespace WebAPI.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
         [HttpDelete("delete-project-images")]
         public async Task<IActionResult> DeleteImagesByProjectId(int projectId)
         {

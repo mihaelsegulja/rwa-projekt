@@ -45,23 +45,20 @@
 
 <hr/>
 
-@{
-    int totalPages = (int)Math.Ceiling(Model.TotalItems / (double)Model.PageSize);
-}
-<div class="row align-items-center justify-content-center mt-4 mb-4">
+<div class="row align-items-center justify-content-center my-4">
     <div class="col-auto">
         <nav id="pagination-container">
             <ul class="pagination mb-0">
                 <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
                     <a class="page-link" href="#" data-page="@(Model.Page - 1)">Previous</a>
                 </li>
-                @for (int i = 1; i <= totalPages; i++)
+                @for (int i = 1; i <= Model.TotalPages; i++)
                 {
                     <li class="page-item @(i == Model.Page ? "active" : "")">
                         <a class="page-link" href="#" data-page="@i">@i</a>
                     </li>
                 }
-                <li class="page-item @(Model.Page == totalPages ? "disabled" : "")">
+                <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
                     <a class="page-link" href="#" data-page="@(Model.Page + 1)">Next</a>
                 </li>
             </ul>
