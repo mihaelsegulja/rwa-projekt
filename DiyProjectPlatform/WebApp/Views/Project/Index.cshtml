@@ -84,10 +84,28 @@
     @await Html.PartialAsync("_ProjectListPartial", Model)
 </div>
 
-@await Html.PartialAsync("_ProjectDeleteModalPartial");
+@await Html.PartialAsync("_DeleteModalPartial")
 
 @section Scripts {
-    <script src="~/js/project-delete-modal.js"></script>
+    <script src="~/js/delete-modal.js"></script>
+    <script>
+        $(document).on('submit', '#deleteForm', function (e) {
+            e.preventDefault();
+
+            const $form = $(this);
+            const action = $form.attr('action');
+
+            $.post(action)
+                .done(() => {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+                    modal.hide();
+                    showToast("Item deleted successfully", "success");
+                })
+                .fail(() => {
+                    showToast("Failed to delete item", "error");
+                });
+        });
+    </script>
 
     <!-- Search and filtering -->
     <script>
@@ -99,19 +117,19 @@
             const difficulty = $('select[name="DifficultyLevelId"]').val();
             const pageSize = $('#pageSizeSelect').val();
 
-                $.get("/Project/Search", {
-                    search: search,
-                    topicId: topicId,
-                    difficultyLevelId: difficulty,
-                    page: page,
-					pageSize: pageSize
-                }).done(function (data) {
-                    $('#projectResults').html(data);
-                }).fail(function () {
-                    showToast("Failed to load page", "error");
-                }).always(function () {
-                    hideSpinner();
-                });
+            $.get("/Project/Search", {
+                search: search,
+                topicId: topicId,
+                difficultyLevelId: difficulty,
+                page: page,
+				pageSize: pageSize
+            }).done(function (data) {
+                $('#projectResults').html(data);
+            }).fail(function () {
+                showToast("Failed to load page", "error");
+            }).always(function () {
+                hideSpinner();
+            });
         }
 
         $('form').on('submit', function (e) {

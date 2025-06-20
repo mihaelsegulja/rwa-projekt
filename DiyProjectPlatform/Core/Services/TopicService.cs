@@ -68,10 +68,16 @@ public class TopicService : ITopicService
         var topic = await _dbContext.Topics.FindAsync(id) 
             ?? throw new NotFoundException($"Topic {id} not found");
 
-        _dbContext.Topics.Remove(topic);
-        await _dbContext.SaveChangesAsync();
-        await _logService.AddLogAsync($"Topic {id} deleted", LogLevel.Info);
-
-        return $"Topic {id} successfully deleted";
+        try
+        {
+            _dbContext.Topics.Remove(topic);
+            await _dbContext.SaveChangesAsync();
+            await _logService.AddLogAsync($"Topic {id} deleted", LogLevel.Info);
+            return $"Topic {id} successfully deleted";
+        }
+        catch (DbUpdateException)
+        {
+            throw new ConflictException("Cannot delete topic because it is used by one or more projects.");
+        }
     }
 }

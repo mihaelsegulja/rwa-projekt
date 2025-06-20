@@ -68,10 +68,16 @@ public class MaterialService : IMaterialService
         var material = await _dbContext.Materials.FindAsync(id) 
             ?? throw new NotFoundException($"Material {id} not found");
 
-        _dbContext.Materials.Remove(material);
-        await _dbContext.SaveChangesAsync();
-        await _logService.AddLogAsync($"Material {id} deleted", LogLevel.Info);
-
-        return $"Material {id} successfully deleted";
+        try
+        {
+            _dbContext.Materials.Remove(material);
+            await _dbContext.SaveChangesAsync();
+            await _logService.AddLogAsync($"Material {id} deleted", LogLevel.Info);
+            return $"Material {id} successfully deleted";
+        }
+        catch (DbUpdateException)
+        {
+            throw new ConflictException("Cannot delete material because it is used by one or more projects.");
+        }
     }
 }

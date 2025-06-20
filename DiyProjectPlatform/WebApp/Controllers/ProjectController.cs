@@ -174,7 +174,7 @@ public class ProjectController : Controller
         var projectDetail = await _projectService.GetProjectByIdAsync(id);
 
         if (User.Identity?.Name != projectDetail.Username && !User.IsInRole(nameof(UserRole.Admin)))
-            throw new ForbiddenException("Not allowed to edit this project");
+            throw new ForbiddenException($"Not allowed to edit project {id}");
 
         var materials = await _materialService.GetAllMaterialsAsync();
         var topics = await _topicService.GetAllTopicsAsync();
@@ -236,9 +236,8 @@ public class ProjectController : Controller
         return RedirectToAction("Index");
     }
 
-    [Authorize(Roles = nameof(UserRole.Admin))]
+    //[Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Core.Dtos;
 using Core.Interfaces;
+using Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Enums;
@@ -65,6 +66,22 @@ public class MaterialController : Controller
             vm.Name = vm.Name.Trim();
             var dto = _mapper.Map<MaterialDto>(vm);
             var result = await _materialService.UpdateMaterialAsync(dto);
+            TempData["Success"] = result;
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
+
+        return RedirectToAction("Index");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            var result = await _materialService.DeleteMaterialAsync(id);
             TempData["Success"] = result;
         }
         catch (AppException e)

@@ -74,4 +74,20 @@ public class TopicController : Controller
 
         return RedirectToAction("Index");
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            var result = await _topicService.DeleteTopicAsync(id);
+            TempData["Success"] = result;
+        }
+        catch (AppException e)
+        {
+            TempData["Error"] = e.Message;
+        }
+
+        return RedirectToAction("Index");
+    }
 }

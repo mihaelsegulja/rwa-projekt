@@ -29,6 +29,15 @@
                         <input asp-for="@Model[i].Name" class="form-control me-2" />
                         <span asp-validation-for="@Model[i].Name" class="text-danger me-2"></span>
                         <button type="submit" class="btn btn-sm btn-secondary">Update</button>
+                        <button type="button"
+                                class="btn btn-sm btn-danger ms-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal"
+                                data-item-id="@Model[i].Id"
+                                data-item-name="@Model[i].Name"
+                                data-item-type="Topic">
+                            Delete
+                        </button>
                     </form>
                 </td>
             </tr>
@@ -36,6 +45,9 @@
     </tbody>
 </table>
 
+@await Html.PartialAsync("_DeleteModalPartial")
+
 @section Scripts {
+	<script src="~/js/delete-modal.js"></script>
     @await Html.PartialAsync("_ValidationScriptsPartial")
 }
