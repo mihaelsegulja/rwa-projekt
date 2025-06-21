@@ -43,6 +43,7 @@ public class LogService : ILogService
             Level = level.ToString(),
             Timestamp = DateTime.UtcNow
         };
+
         var log = _mapper.Map<Log>(logDto);
         _dbContext.Logs.Add(log);
         await _dbContext.SaveChangesAsync();

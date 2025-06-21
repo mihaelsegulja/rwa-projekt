@@ -100,5 +100,6 @@ public class ImageService : IImageService
         _dbContext.Images.RemoveRange(imagesToDelete);
 
         await _dbContext.SaveChangesAsync();
+        await _logService.AddLogAsync($"Deleted all images for project {projectId}", LogLevel.Info);
     }
 }
