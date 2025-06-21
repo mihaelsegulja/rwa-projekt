@@ -142,39 +142,38 @@ else
     <p class="text-muted">No comments yet.</p>
 }
 
-<!-- Edit -->
-@if (User.IsInRole(nameof(Shared.Enums.UserRole.Admin)) || User.Identity?.Name == Model.Author)
-{
-    <a href="@Url.Action("Edit", "Project", new { id = Model.Id })"
-       class="btn btn-secondary position-fixed"
-       style="bottom: 30%; right: 15px; z-index: 800;">
-        <i class="bi bi-pencil-square"></i>
+<div class="position-fixed d-flex flex-column gap-2" style="bottom: 15%; right: 15px; z-index: 800;">
+    <!-- Edit -->
+    @if (User.IsInRole(nameof(Shared.Enums.UserRole.Admin)) || User.Identity?.Name == Model.Author)
+    {
+        <a href="@Url.Action("Edit", "Project", new { id = Model.Id })"
+           class="btn btn-secondary">
+            <i class="bi bi-pencil-square"></i>
+        </a>
+    }
+
+    <!-- Delete -->
+    @if (User.IsInRole(nameof(Shared.Enums.UserRole.Admin)))
+    {
+        <button type="button"
+                class="btn btn-danger"
+                data-bs-toggle="modal"
+                data-bs-target="#confirmDeleteModal"
+                data-item-id="@Model.Id"
+                data-item-name="@Model.Title"
+                data-item-type="Project">
+            <i class="bi bi-trash-fill"></i>
+        </button>
+    }
+
+    <!-- Back -->
+    <a href="@Url.Action("Index", "Project")"
+       class="btn btn-info">
+        <i class="bi bi-arrow-left"></i>
     </a>
-}
+</div>
 
-<!-- Delete -->
-@if (User.IsInRole(nameof(Shared.Enums.UserRole.Admin)))
-{
-    <button type="button"
-            class="btn btn-danger position-fixed"
-            style="bottom: 20%; right: 15px; z-index: 800;"
-            data-bs-toggle="modal"
-            data-bs-target="#confirmDeleteModal"
-            data-item-id="@Model.Id"
-            data-item-name="@Model.Title"
-            data-item-type="Project">
-        <i class="bi bi-trash-fill"></i>
-    </button>
-}
-
-<!-- Back -->
-<a href="@Url.Action("Index", "Project")"
-   class="btn btn-info position-fixed"
-   style="bottom: 40%; right: 15px; z-index: 800;">
-    <i class="bi bi-arrow-left"></i>
-</a>
-
-@await Html.PartialAsync("_DeleteModalPartial");
+@await Html.PartialAsync("_DeleteModalPartial")
 
 @section Scripts {
     <script src="~/js/delete-modal.js"></script>
