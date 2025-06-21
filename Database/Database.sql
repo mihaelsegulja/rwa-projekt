@@ -141,3 +141,25 @@ INSERT INTO [ProjectStatusType]([Id], [Name]) VALUES
 	(30, 'Rejected'),
 	(40, 'Deleted')
 GO
+
+INSERT INTO [User]
+           ([FirstName]
+           ,[LastName]
+           ,[Username]
+           ,[Email]
+           ,[PasswordHash]
+           ,[PasswordSalt]
+           ,[IsActive]
+           ,[DateCreated]
+           ,[UserRoleId])
+     VALUES
+           ('Admin'
+           ,'Adminić'
+           ,'Admin0000'
+           ,'example@notadomain.net'
+           ,'Sq0823kG7LqdQv6BX67fFsjVuYAUffPz5HNlzTrsalU='
+           ,'dKhqCOUFbfqXSA4Mrxi2mg=='
+           ,1
+           ,GETUTCDATE()
+           ,100)
+GO
