@@ -90,7 +90,7 @@
         <form asp-controller="Comment" asp-action="Add" method="post">
             <input type="hidden" name="ProjectId" value="@Model.Id" />
             <div class="mb-3">
-                <textarea name="Content" class="form-control" rows="3" required></textarea>
+                <textarea name="Content" class="form-control" rows="3"></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Add Comment</button>
         </form>

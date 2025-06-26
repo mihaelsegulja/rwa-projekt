@@ -23,18 +23,24 @@ public class CommentController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Add(CommentDto dto)
+    public async Task<IActionResult> Add(CommentAddVm vm)
     {
         if (!ModelState.IsValid)
         {
             TempData["Error"] = "Invalid comment";
-            return RedirectToAction("Details", "Project", new { id = dto.ProjectId });
+            return RedirectToAction("Details", "Project", new { id = vm.ProjectId });
         }
 
         try
         {
-            dto.UserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
-            dto.DateCreated = DateTime.UtcNow;
+            var dto = new CommentDto
+            {
+                ProjectId = vm.ProjectId,
+                Content = vm.Content.Trim(),
+                UserId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier),
+                DateCreated = DateTime.UtcNow
+            };
+
             await _commentService.AddCommentAsync(dto);
             TempData["Success"] = "Comment added";
         }
@@ -43,7 +49,7 @@ public class CommentController : Controller
             TempData["Error"] = e.Message;
         }
 
-        return RedirectToAction("Details", "Project", new { id = dto.ProjectId });
+        return RedirectToAction("Details", "Project", new { id = vm.ProjectId });
     }
 
     [HttpPost]
