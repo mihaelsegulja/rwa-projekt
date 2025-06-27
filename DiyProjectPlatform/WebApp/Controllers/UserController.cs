@@ -3,6 +3,7 @@ using Core.Dtos;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Exceptions;
 using Shared.Helpers;
 using System.Security.Claims;
 using WebApp.ViewModels;
@@ -68,8 +69,18 @@ public class UserController : Controller
 
         var userId = ClaimsHelper.GetClaimValueAsInt(User, ClaimTypes.NameIdentifier);
         var dto = _mapper.Map<ChangePasswordDto>(vm);
-        var result = await _userService.ChangeUserPasswordAsync(userId, dto);
+        try
+        {
+            var result = await _userService.ChangeUserPasswordAsync(userId, dto);
 
-        return Ok(result);
+            if (result == null)
+                return BadRequest(new { General = "Password update failed." });
+
+            return Ok(result);
+        }
+        catch (AppException e)
+        {
+            return BadRequest(new { CurrentPassword = e.Message });
+        }
     }
 }

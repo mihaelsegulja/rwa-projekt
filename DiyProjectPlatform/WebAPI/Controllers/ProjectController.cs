@@ -69,6 +69,7 @@ public class ProjectController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = nameof(Shared.Enums.UserRole.Admin))]
     [HttpDelete("delete")]
     public async Task<IActionResult> DeleteProject(int id)
     {

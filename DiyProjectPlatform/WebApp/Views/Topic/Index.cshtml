@@ -25,9 +25,9 @@
             <tr>
                 <td>
                     <form asp-action="Update" method="post" class="d-flex align-items-center">
-                        <input asp-for="@Model[i].Id" type="hidden" />
-                        <input asp-for="@Model[i].Name" class="form-control me-2" />
-                        <span asp-validation-for="@Model[i].Name" class="text-danger me-2"></span>
+                        <input type="hidden" name="Id" value="@Model[i].Id" />
+                        <input type="text" name="Name" value="@Model[i].Name" class="form-control me-2" />
+                        <span class="text-danger me-2">@Html.ValidationMessage($"[{i}].Name")</span>
                         <button type="submit" class="btn btn-sm btn-secondary">Update</button>
                         <button type="button"
                                 class="btn btn-sm btn-danger ms-2"

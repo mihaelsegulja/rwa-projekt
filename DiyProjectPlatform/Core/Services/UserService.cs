@@ -106,7 +106,7 @@ public class UserService : IUserService
 
         var currentHash = PasswordHashHelper.GetHash(changePasswordDto.CurrentPassword, user.PasswordSalt);
         if (currentHash != user.PasswordHash)
-            throw new UnauthorizedAccessException("Current password is incorrect");
+            throw new BadRequestException("Current password is incorrect");
 
         var newSalt = PasswordHashHelper.GetSalt();
         var newHash = PasswordHashHelper.GetHash(changePasswordDto.NewPassword, newSalt);

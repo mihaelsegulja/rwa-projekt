@@ -236,7 +236,7 @@ public class ProjectController : Controller
         return RedirectToAction("Index");
     }
 
-    //[Authorize(Roles = nameof(UserRole.Admin))]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     [HttpPost]
     public async Task<IActionResult> Delete(int id)
     {
